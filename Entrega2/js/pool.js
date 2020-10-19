@@ -8,7 +8,7 @@
 var scene, camera, renderer, helper, cameraTop, activeCamera, cameraSide;
 var geometry, material, materialGreen,materialBlack, materialWhite, retangle, group, materialRed;
 var stick1, stick2, stick3, stick4, stick5, stick6;
-var ball1, ball2, ball3, ball4, ball5, ball6;
+var ball1, ball2, ball3, ball4, ball5, ball6, balltest;
 var ViewSize = 50;
 var raio = 0.5;
 var alturaMesa = 2.2;
@@ -21,7 +21,9 @@ var delta = 0; //starts time at 0
 var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
 var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
 var momentum = [0,0,0,0,0,0];
-var vector = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+var vectorBalls = [6];
+var testVec;
+var testVec2 = new THREE.Vector3(0,1.5,-9);
 
 function createRenderer()
 {
@@ -121,6 +123,8 @@ function createBall(xCord, yCord, zCord){
     ball.position.y = yCord;
     ball.position.z = zCord;
 
+    vectorBalls.push(ball);
+
     return ball;
 }
 
@@ -181,15 +185,14 @@ function initCues(){
     scene.add(stick5);
     scene.add(stick6);*/
 }
-
 function initBalls(){
     defineBall();
     ball6 = createBall(0,1 + raio,-9);
-    ball2 = createBall(-2.5,1 + raio,-5);
-    ball1 = createBall(2.5,1 + raio,-5);
+    ball5 = createBall(0,1 + raio,9);
     ball4 = createBall(-2.5,1 + raio,5);
     ball3 = createBall(2.5,1 + raio,5);
-    ball5 = createBall(0,1 + raio,9);
+    ball2 = createBall(-2.5,1 + raio,-5);
+    ball1 = createBall(2.5,1 + raio,-5);
     scene.add(ball1);
     scene.add(ball2);
     scene.add(ball3);
@@ -277,6 +280,7 @@ function createScene()
     scene.background = new THREE.Color(0x808080); //light blue
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
+
 function shootBall(num){
     if(num == 6){
         pivotPoint6.position.z += 0.5;
@@ -298,6 +302,22 @@ function shootBall(num){
         momentum[4] = 0.5;
     }
 }
+function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
+    var middle = new THREE.Vector3();
+    var geometry = mesh.geometry;
+
+    geometry.computeBoundingBox();
+
+    middle.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
+    middle.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
+    middle.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
+    mesh.localToWorld( middle );
+    return middle;
+}
+function colide()
+{
+
+}
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
     materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
@@ -315,8 +335,11 @@ function init() {
     initCues();
     initTable();
     initBalls();
+    renderer.render(scene,activeCamera);/*Tirar depois!!!!!*/
+    testVec = getCenterPoint(ball6);
+    //vector[0] = testVec;
+    //window.alert(vectorBalls[2].y);
     
-    renderer.render(scene,activeCamera);
 
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("keydown", onKeyDown);
