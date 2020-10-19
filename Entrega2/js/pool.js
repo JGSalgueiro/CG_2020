@@ -1,13 +1,14 @@
 /*+--------------------------------------------------------------------------------------+
-  |    1st Laboratory Delivery - Computer Graphics 2020 - Instituto Superior Técnico     |
+  |    2nd Laboratory Delivery - Computer Graphics 2020 - Instituto Superior Técnico     |
   +--------------------------------------------------------------------------------------+
   |                          David Miranda nº 93697 Group 10                             |
   |                         João Salgueiro nº 93725 Group 10                             |
   +--------------------------------------------------------------------------------------+*/
 
 var scene, camera, renderer, helper, cameraTop, activeCamera, cameraSide;
-var geometry, material, materialGreen,materialBlack, retangle, group, materialRed;
+var geometry, material, materialGreen,materialBlack, materialWhite, retangle, group, materialRed;
 var stick1, stick2, stick3, stick4, stick5, stick6;
+var ball1, ball2, ball3, ball4, ball5, ball6;
 var ViewSize = 50;
 var SCREEN_WIDTH = window.innerWidth;
 var SCREEN_HEIGHT = window.innerHeight;
@@ -15,7 +16,8 @@ var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 var clock = new THREE.Clock();
 var speed = 5; //units a second
 var delta = 0; //starts time at 0
-var g1,g2,g3,g4; //groups
+var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
+var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
 
 function createRenderer()
 {
@@ -44,6 +46,9 @@ function createCameraSide()
     cameraSide.rotation.y = Math.PI / 2;
     cameraSide.position.set(0,5,0);
     scene.add(cameraSide);
+}
+function defineBall(){
+    geometry = new THREE.SphereGeometry(0.5,32,32);
 }
 function defineRetangleSmall()
 {
@@ -105,7 +110,91 @@ function createStick(xCord, yCord, zCord, type) //deitado = 1 : tube lies down (
     return stick;
 }
 
-function onResize() {
+function createBall(xCord, yCord, zCord){
+    ball = new THREE.Mesh(geometry, materialWhite);
+
+    ball.position.x = xCord;
+    ball.position.y = yCord;
+    ball.position.z = zCord;
+
+    return ball;
+}
+
+function initTable(){
+    defineRetangleSmall();
+    createRetangle(0,1.5,-10,1);
+    createRetangle(0,1.5,10,1);
+
+    defineRetangleBig();
+    createRetangle(-3.5,1.5,0,2);
+    createRetangle(3.5,1.5,0,2);
+
+    defineBottomTable();
+    createRetangle(0,3,0,3);
+    scene.add(group);
+}
+
+function initCues(){
+    defineStick();
+    pivotPoint1 = new THREE.Object3D();
+    pivotPoint2 = new THREE.Object3D();
+    pivotPoint3 = new THREE.Object3D();
+    pivotPoint4 = new THREE.Object3D();
+    pivotPoint5 = new THREE.Object3D();
+    pivotPoint6 = new THREE.Object3D();
+
+    stick1 = createStick(3.5,1,0,0);
+    stick2 = createStick(-3.5,1,0,2);
+    stick3 = createStick(3.5,1,0,0);
+    stick4 = createStick(-3.5,1,0,2);
+    stick5 = createStick(0,1,3.5,1);
+    stick6 = createStick(0,1,-3.5,3);
+
+    pivotPoint1.add(stick1);
+    pivotPoint1.position.set(2.5,4,-5);
+    pivotPoint2.add(stick2);
+    pivotPoint2.position.set(-2.5,4,-5);
+    pivotPoint3.add(stick3);
+    pivotPoint3.position.set(2.5,4,5);
+    pivotPoint4.add(stick4);
+    pivotPoint4.position.set(-2.5,4,5);
+    pivotPoint5.add(stick5);
+    pivotPoint5.position.set(0,4,9);
+    pivotPoint6.add(stick6);
+    pivotPoint6.position.set(0,4,-9);
+    // Pivot points
+    //cue1.add(pivotPoint1);
+
+    scene.add(pivotPoint1);
+    scene.add(pivotPoint2);
+    scene.add(pivotPoint3);
+    scene.add(pivotPoint4);
+    scene.add(pivotPoint5);
+    scene.add(pivotPoint6);
+    /*scene.add(stick2);
+    scene.add(stick3);
+    scene.add(stick4);
+    scene.add(stick5);
+    scene.add(stick6);*/
+}
+
+function initBalls(){
+    defineBall();
+    ball1 = createBall(0,4,-9);
+    ball2 = createBall(-2.5,4,-5);
+    ball3 = createBall(2.5,4,-5);
+    ball4 = createBall(-2.5,4,5);
+    ball5 = createBall(2.5,4,5);
+    ball6 = createBall(0,4,9);
+    scene.add(ball1);
+    scene.add(ball2);
+    scene.add(ball3);
+    scene.add(ball4);
+    scene.add(ball5);
+    scene.add(ball6);
+}
+
+function onResize(){
     renderer.setSize(window.innerWidth, window.innerHeight);
     
     if (window.innerHeight > 0 && window.innerWidth > 0) {
@@ -136,36 +225,11 @@ function onKeyDown(e) { //KeyPressed
             }
         });
         break;
-    case 37:// <-
-        g1.userData.keyLeft = true;
-        break;
-    case 39:// ->
-        g1.userData.keyRight = true;
-        break;
-    case 38://Up key
-        g1.userData.keyUp = true
-        break;
-    case 40://Down key
-        g1.userData.keyDown =  true;
-        break;
+
     case 81://Q
-        g1.userData.rotationClock = true;
-       break;
-    case 87://W
-        g1.userData.rotationAntiClock = true;
-       break;
-    case 65://A
-       g2.userData.rotationClock = true;
-       break;
-    case 68://D
-        g2.userData.rotationAntiClock = true;
-       break;
-    case 67://C
-       g3.userData.rotationAntiClock = true;
-       break;
-    case 90://Z
-       g3.userData.rotationClock = true;
-       break;
+        pivotPoint1.rotation.y += 0.05;
+        break;
+    
     }
 }
 
@@ -206,44 +270,27 @@ function onKeyUp(e) { //KeyRealeased
 function createScene()
 {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xd1edf2); //light blue
+    scene.background = new THREE.Color(0x808080); //light blue
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
 function init() {
+    materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
     materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
     materialGreen = new THREE.MeshBasicMaterial({color: 0x0a6c03});
     materialRed = new THREE.MeshBasicMaterial({color: 0x003297});
     group = new THREE.Group();
-    /*texture = new THREE.TextureLoader().load( 'pool_table.jpg' );
-    materialGreen = new THREE.MeshBasicMaterial({map: texture});*/
+
+
     createScene();
     createRenderer();
     createCamera();
     createCameraTop();
     createCameraSide();
-    defineRetangleSmall();
-    createRetangle(0,1.5,-10,1);
-    createRetangle(0,1.5,10,1);
-    defineRetangleBig();
-    createRetangle(-3.5,1.5,0,2);
-    createRetangle(3.5,1.5,0,2);
-    defineBottomTable();
-    createRetangle(0,0.5,0,3);
-    defineStick();
-    stick1 = createStick(6,4,-5,0);
-    stick2 = createStick(6,4,5,0);
-    stick3 = createStick(0,4,12.5,1);
-    stick4 = createStick(-6,4,5,2);
-    stick5 = createStick(-6,4,-5,2);
-    stick6 = createStick(0,4,-12.5,3);
-    scene.add(stick1);
-    scene.add(stick2);
-    scene.add(stick3);
-    scene.add(stick4);
-    scene.add(stick5);
-    scene.add(stick6);
-    scene.add(group);
 
+    initCues();
+    initTable();
+    initBalls();
+    
     renderer.render(scene,activeCamera);
 
     window.addEventListener("keyup", onKeyUp);
@@ -252,7 +299,9 @@ function init() {
 }
 function update()
 {
+   
 }
+
 function animate() {
     delta = clock.getDelta(); //obtains current time
     update();
