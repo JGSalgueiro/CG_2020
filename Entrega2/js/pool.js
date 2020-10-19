@@ -21,9 +21,11 @@ var delta = 0; //starts time at 0
 var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
 var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
 var momentum = [0,0,0,0,0,0];
-var vectorBalls = [6];
+var vectorBalls = [];
+var vectorPivots = [];
 var testVec;
 var testVec2 = new THREE.Vector3(0,1.5,-9);
+var pass = 0;
 
 function createRenderer()
 {
@@ -124,6 +126,7 @@ function createBall(xCord, yCord, zCord){
     ball.position.z = zCord;
 
     vectorBalls.push(ball);
+    scene.add(ball);
 
     return ball;
 }
@@ -141,15 +144,19 @@ function initTable(){
     createRetangle(0,0.5,0,3);
     scene.add(group);
 }
-
+function initPivots(num)
+{
+    while( num > 0)
+    {
+        pivotPoint = new THREE.Object3D();
+        vectorPivots.push(pivotPoint)
+        num--;
+    }
+}
 function initCues(){
     defineStick();
-    pivotPoint1 = new THREE.Object3D();
-    pivotPoint2 = new THREE.Object3D();
-    pivotPoint3 = new THREE.Object3D();
-    pivotPoint4 = new THREE.Object3D();
-    pivotPoint5 = new THREE.Object3D();
-    pivotPoint6 = new THREE.Object3D();
+    initPivots();
+    initPivots(6);
 
     stick1 = createStick(3.5,1,0,0);
     stick2 = createStick(-3.5,1,0,2);
@@ -158,27 +165,27 @@ function initCues(){
     stick5 = createStick(0,1,3.5,1);
     stick6 = createStick(0,1,-3.5,3);
 
-    pivotPoint1.add(stick1);
-    pivotPoint1.position.set(2.5,alturaMesa,-5);
-    pivotPoint2.add(stick2);
-    pivotPoint2.position.set(-2.5,alturaMesa,-5);
-    pivotPoint3.add(stick3);
-    pivotPoint3.position.set(2.5,alturaMesa,5);
-    pivotPoint4.add(stick4);
-    pivotPoint4.position.set(-2.5,alturaMesa,5);
-    pivotPoint5.add(stick5);
-    pivotPoint5.position.set(0,alturaMesa,9);
-    pivotPoint6.add(stick6);
-    pivotPoint6.position.set(0,alturaMesa,-9);
+    vectorPivots[0].add(stick1);
+    vectorPivots[0].position.set(2.5,alturaMesa,-5);
+    vectorPivots[1].add(stick2);
+    vectorPivots[1].position.set(-2.5,alturaMesa,-5);
+    vectorPivots[2].add(stick3);
+    vectorPivots[2].position.set(2.5,alturaMesa,5);
+    vectorPivots[3].add(stick4);
+    vectorPivots[3].position.set(-2.5,alturaMesa,5);
+    vectorPivots[4].add(stick5);
+    vectorPivots[4].position.set(0,alturaMesa,9);
+    vectorPivots[5].add(stick6);
+    vectorPivots[5].position.set(0,alturaMesa,-9);
     // Pivot points
     //cue1.add(pivotPoint1);
-
-    scene.add(pivotPoint1);
-    scene.add(pivotPoint2);
-    scene.add(pivotPoint3);
-    scene.add(pivotPoint4);
-    scene.add(pivotPoint5);
-    scene.add(pivotPoint6);
+    scene.add(vectorPivots[0]);
+    scene.add(vectorPivots[1]);
+    scene.add(vectorPivots[2]);
+    scene.add(vectorPivots[3]);
+    scene.add(vectorPivots[4]);
+    scene.add(vectorPivots[5]);
+    
     /*scene.add(stick2);
     scene.add(stick3);
     scene.add(stick4);
@@ -187,18 +194,20 @@ function initCues(){
 }
 function initBalls(){
     defineBall();
-    ball6 = createBall(0,1 + raio,-9);
-    ball5 = createBall(0,1 + raio,9);
-    ball4 = createBall(-2.5,1 + raio,5);
-    ball3 = createBall(2.5,1 + raio,5);
-    ball2 = createBall(-2.5,1 + raio,-5);
-    ball1 = createBall(2.5,1 + raio,-5);
-    scene.add(ball1);
+    createBall(2.5,1 + raio,-5);//Ball0
+    createBall(-2.5,1 + raio,-5);//Ball1
+    createBall(2.5,1 + raio,5);//Ball2
+    createBall(-2.5,1 + raio,5);//Ball3
+    createBall(0,1 + raio,9);//Ball4
+    createBall(0,1 + raio,-9);//Ball5
+   
+
+    /*scene.add(ball1);
     scene.add(ball2);
     scene.add(ball3);
     scene.add(ball4);
     scene.add(ball5);
-    scene.add(ball6);
+    scene.add(ball6);*/
 }
 
 function onResize(){
@@ -223,7 +232,7 @@ function onKeyDown(e) { //KeyPressed
         activeCamera = cameraSide;
         break;
     case 52: //4
-        shootBall(6);
+        shootBall(5);
         break;
     case 69:  //e
         scene.traverse(function (node) {
@@ -281,26 +290,9 @@ function createScene()
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
 
-function shootBall(num){
-    if(num == 6){
-        pivotPoint6.position.z += 0.5;
-        momentum[5] = 0.8;
-
-    }
-    if(num == 2){
-        pivotPoint6.position.z += 0.5;
-        momentum[2] = 0.5;
-        
-    }
-    if(num == 3){
-        pivotPoint6.position.z += 0.5;
-        momentum[3] = 0.5;
-        
-    }
-    if(num == 4){
-        pivotPoint6.position.z += 0.5;
-        momentum[4] = 0.5;
-    }
+function shootBall(num){/*bolas vao de 0-5*/
+    vectorPivots[num].position.z += 0.5;
+    momentum[num] = 0.8;
 }
 function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
     var middle = new THREE.Vector3();
@@ -314,9 +306,9 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-function colide()
+function colideBall()
 {
-
+    //por fazer
 }
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
@@ -336,7 +328,7 @@ function init() {
     initTable();
     initBalls();
     renderer.render(scene,activeCamera);/*Tirar depois!!!!!*/
-    testVec = getCenterPoint(ball6);
+    testVec = getCenterPoint(vectorBalls[5]);
     //vector[0] = testVec;
     //window.alert(vectorBalls[2].y);
     
@@ -347,9 +339,16 @@ function init() {
 }
 function update()
 {
-    ball6.position.z += 2 * momentum[5];
+    if(momentum[5] != 0){/*so pra testar se o center point atualiza se com o tempo = TRUE*/
+        pass = pass + 1;
+    }
+    vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
-}
+    if(pass == 45)
+    {
+        window.alert(getCenterPoint(vectorBalls[5]).z);
+    }
+} 
 
 function animate() {
     delta = clock.getDelta(); //obtains current time
