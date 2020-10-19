@@ -10,6 +10,8 @@ var geometry, material, materialGreen,materialBlack, materialWhite, retangle, gr
 var stick1, stick2, stick3, stick4, stick5, stick6;
 var ball1, ball2, ball3, ball4, ball5, ball6;
 var ViewSize = 50;
+var raio = 0.5;
+var alturaMesa = 2.2;
 var SCREEN_WIDTH = window.innerWidth;
 var SCREEN_HEIGHT = window.innerHeight;
 var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -48,15 +50,15 @@ function createCameraSide()
     scene.add(cameraSide);
 }
 function defineBall(){
-    geometry = new THREE.SphereGeometry(0.5,32,32);
+    geometry = new THREE.SphereGeometry(raio,32,32);
 }
 function defineRetangleSmall()
 {
-    geometry= new THREE.BoxGeometry(7,3,0.3);
+    geometry= new THREE.BoxGeometry(7,alturaMesa,0.3);
 }
 function defineRetangleBig()
 {
-    geometry = new THREE.BoxGeometry(0.3,3,20);
+    geometry = new THREE.BoxGeometry(0.3,alturaMesa,20);
 }
 function defineBottomTable()
 {
@@ -122,15 +124,15 @@ function createBall(xCord, yCord, zCord){
 
 function initTable(){
     defineRetangleSmall();
-    createRetangle(0,1.5,-10,1);
-    createRetangle(0,1.5,10,1);
+    createRetangle(0,1.1,-10,1);
+    createRetangle(0,1.1,10,1);
 
     defineRetangleBig();
-    createRetangle(-3.5,1.5,0,2);
-    createRetangle(3.5,1.5,0,2);
+    createRetangle(-3.5,1.1,0,2);
+    createRetangle(3.5,1.1,0,2);
 
     defineBottomTable();
-    createRetangle(0,3,0,3);
+    createRetangle(0,0.5,0,3);
     scene.add(group);
 }
 
@@ -151,17 +153,17 @@ function initCues(){
     stick6 = createStick(0,1,-3.5,3);
 
     pivotPoint1.add(stick1);
-    pivotPoint1.position.set(2.5,4,-5);
+    pivotPoint1.position.set(2.5,alturaMesa,-5);
     pivotPoint2.add(stick2);
-    pivotPoint2.position.set(-2.5,4,-5);
+    pivotPoint2.position.set(-2.5,alturaMesa,-5);
     pivotPoint3.add(stick3);
-    pivotPoint3.position.set(2.5,4,5);
+    pivotPoint3.position.set(2.5,alturaMesa,5);
     pivotPoint4.add(stick4);
-    pivotPoint4.position.set(-2.5,4,5);
+    pivotPoint4.position.set(-2.5,alturaMesa,5);
     pivotPoint5.add(stick5);
-    pivotPoint5.position.set(0,4,9);
+    pivotPoint5.position.set(0,alturaMesa,9);
     pivotPoint6.add(stick6);
-    pivotPoint6.position.set(0,4,-9);
+    pivotPoint6.position.set(0,alturaMesa,-9);
     // Pivot points
     //cue1.add(pivotPoint1);
 
@@ -180,12 +182,12 @@ function initCues(){
 
 function initBalls(){
     defineBall();
-    ball1 = createBall(0,4,-9);
-    ball2 = createBall(-2.5,4,-5);
-    ball3 = createBall(2.5,4,-5);
-    ball4 = createBall(-2.5,4,5);
-    ball5 = createBall(2.5,4,5);
-    ball6 = createBall(0,4,9);
+    ball1 = createBall(0,1.5,-9);
+    ball2 = createBall(-2.5,1.5,-5);
+    ball3 = createBall(2.5,1.5,-5);
+    ball4 = createBall(-2.5,1.5,5);
+    ball5 = createBall(2.5,1.5,5);
+    ball6 = createBall(0,1.5,9);
     scene.add(ball1);
     scene.add(ball2);
     scene.add(ball3);
