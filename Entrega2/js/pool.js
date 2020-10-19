@@ -20,6 +20,8 @@ var speed = 5; //units a second
 var delta = 0; //starts time at 0
 var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
 var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
+var momentum = [0,0,0,0,0,0];
+var vector = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
 
 function createRenderer()
 {
@@ -182,12 +184,12 @@ function initCues(){
 
 function initBalls(){
     defineBall();
-    ball1 = createBall(0,1.5,-9);
-    ball2 = createBall(-2.5,1.5,-5);
-    ball3 = createBall(2.5,1.5,-5);
-    ball4 = createBall(-2.5,1.5,5);
-    ball5 = createBall(2.5,1.5,5);
-    ball6 = createBall(0,1.5,9);
+    ball6 = createBall(0,1 + raio,-9);
+    ball2 = createBall(-2.5,1 + raio,-5);
+    ball1 = createBall(2.5,1 + raio,-5);
+    ball4 = createBall(-2.5,1 + raio,5);
+    ball3 = createBall(2.5,1 + raio,5);
+    ball5 = createBall(0,1 + raio,9);
     scene.add(ball1);
     scene.add(ball2);
     scene.add(ball3);
@@ -218,7 +220,7 @@ function onKeyDown(e) { //KeyPressed
         activeCamera = cameraSide;
         break;
     case 52: //4
-        material.wireframe = !material.wireframe;
+        shootBall(6);
         break;
     case 69:  //e
         scene.traverse(function (node) {
@@ -275,6 +277,27 @@ function createScene()
     scene.background = new THREE.Color(0x808080); //light blue
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
+function shootBall(num){
+    if(num == 6){
+        pivotPoint6.position.z += 0.5;
+        momentum[5] = 0.8;
+
+    }
+    if(num == 2){
+        pivotPoint6.position.z += 0.5;
+        momentum[2] = 0.5;
+        
+    }
+    if(num == 3){
+        pivotPoint6.position.z += 0.5;
+        momentum[3] = 0.5;
+        
+    }
+    if(num == 4){
+        pivotPoint6.position.z += 0.5;
+        momentum[4] = 0.5;
+    }
+}
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
     materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
@@ -301,7 +324,8 @@ function init() {
 }
 function update()
 {
-   
+    ball6.position.z += 2 * momentum[5];
+    momentum[5] = momentum[5]/1.10;
 }
 
 function animate() {
