@@ -21,6 +21,7 @@ var delta = 0; //starts time at 0
 var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
 var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
 var momentum = [0,0,0,0,0,0];
+var selectedCues = [0,0,0,0,0,0];
 var vectorBalls = [];
 var vectorPivots = [];
 var testVec;
@@ -95,7 +96,7 @@ function createRetangle(xCord, yCord, zCord,type) //deitado = 1 : tube lies down
 }
 function createStick(xCord, yCord, zCord, type) //deitado = 1 : tube lies down (45º Rotation)
 {
-    stick = new THREE.Mesh(geometry, materialRed);
+    stick = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0x003297}));
     stick.position.x = xCord;
     stick.position.y = yCord;
     stick.position.z = zCord;
@@ -200,7 +201,6 @@ function initBalls(){
     createBall(-2.5,1 + raio,5);//Ball3
     createBall(0,1 + raio,9);//Ball4
     createBall(0,1 + raio,-9);//Ball5
-   
 
     /*scene.add(ball1);
     scene.add(ball2);
@@ -232,7 +232,22 @@ function onKeyDown(e) { //KeyPressed
         activeCamera = cameraSide;
         break;
     case 52: //4
-        shootBall(5);
+        selectedCues[0] = 1;
+        break;
+    case 53: //5
+        selectedCues[1] = 1;
+        break;
+    case 54: //6
+        selectedCues[2] = 1;
+        break;
+    case 55: //7
+        selectedCues[3] = 1;
+        break;
+    case 56: //8
+        selectedCues[4] = 1;
+        break;
+    case 57: //7
+        selectedCues[5] = 1;
         break;
     case 69:  //e
         scene.traverse(function (node) {
@@ -294,6 +309,7 @@ function shootBall(num){/*bolas vao de 0-5*/
     vectorPivots[num].position.z += 0.5;
     momentum[num] = 0.8;
 }
+
 function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
     var middle = new THREE.Vector3();
     var geometry = mesh.geometry;
@@ -314,7 +330,6 @@ function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
     materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
     materialGreen = new THREE.MeshBasicMaterial({color: 0x0a6c03});
-    materialRed = new THREE.MeshBasicMaterial({color: 0x003297});
     group = new THREE.Group();
 
 
@@ -339,6 +354,32 @@ function init() {
 }
 function update()
 {
+    // Update nos Selected Cues
+    if(selectedCues[0] == 1){
+        stick1.material.color.setHex(0x8b0000);
+    }
+    // Update nos Selected Cues
+    if(selectedCues[1] == 1){
+        stick2.material.color.setHex(0x8b0000);
+    }
+    // Update nos Selected Cues
+    if(selectedCues[2] == 1){
+        stick3.material.color.setHex(0x8b0000);
+    }
+    // Update nos Selected Cues
+    if(selectedCues[3] == 1){
+        stick4.material.color.setHex(0x8b0000);
+    }
+    // Update nos Selected Cues
+    if(selectedCues[4] == 1){
+        stick5.material.color.setHex(0x8b0000);
+    }
+    // Update nos Selected Cues
+    if(selectedCues[5] == 1){
+        stick6.material.color.setHex(0x8b0000);
+    }
+
+
     if(momentum[5] != 0){/*so pra testar se o center point atualiza se com o tempo = TRUE*/
         pass = pass + 1;
     }
@@ -356,3 +397,5 @@ function animate() {
     renderer.render(scene,activeCamera);
     requestAnimationFrame(animate);
 }
+
+
