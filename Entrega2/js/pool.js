@@ -27,6 +27,7 @@ var testVec;
 var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
 var vecNo = new THREE.Vector3(120,120,120);
+var ang = 0;
 
 function createRenderer()
 {
@@ -259,6 +260,28 @@ function onKeyDown(e) { //KeyPressed
     case 57: //9
         vectorPivots[5].userData.selected ^= 1;//XOR operation
         break;
+    //---------------------------------------------------------
+    case 37: // Left key
+        if(ang >= -60 && ang <= 60){
+            for(i = 0; i < 6; i++){
+                if(vectorPivots[i].userData.selected == 1){
+                    vectorPivots[i].rotation.y += 0.05;
+                    ang += 0.05
+                }
+            }
+        }
+        break;
+    case 39: // Left key
+        if(ang >= -60 && ang <= 60){
+            for(i = 0; i < 6; i++){
+                if(vectorPivots[i].userData.selected == 1){
+                    vectorPivots[i].rotation.y -= 0.05;
+                    ang -= 0.05
+                }
+            }
+        }
+        break;
+    //---------------------------------------------------------
     case 69:  //e
         scene.traverse(function (node) {
             if (node instanceof THREE.AxisHelper) {
