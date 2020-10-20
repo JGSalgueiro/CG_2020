@@ -27,6 +27,7 @@ var vectorPivots = [];
 var testVec;
 var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
+var vecNull = new THREE.Vector3();
 
 function createRenderer()
 {
@@ -246,7 +247,7 @@ function onKeyDown(e) { //KeyPressed
     case 56: //8
         selectedCues[4] = 1;
         break;
-    case 57: //7
+    case 57: //9
         selectedCues[5] = 1;
         break;
     case 69:  //e
@@ -322,9 +323,23 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-function colideBall(center)
+function checkBallCollision(collisionCenter, center)
 {
-    //por fazer
+    return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
+}
+function colideBall(ball)
+{
+    var i, collisionCenter, center;
+    center = getCenterPoint(ball);
+    for(i = 0; i <= 5; i++)
+    {
+        collisionCenter = getCenterPoint(vectorBalls[i]);
+        if(checkBallCollision(collisionCenter, center))
+        {
+            return collisionCenter;
+        }
+    }
+    return vecNull;/*Nao ha colisao*/
 }
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
@@ -354,6 +369,7 @@ function init() {
 }
 function update()
 {
+    var vec;
     // Update nos Selected Cues
     if(selectedCues[0] == 1){
         stick1.material.color.setHex(0x8b0000);
@@ -378,17 +394,13 @@ function update()
     if(selectedCues[5] == 1){
         stick6.material.color.setHex(0x8b0000);
     }
-
-
-    if(momentum[5] != 0){/*so pra testar se o center point atualiza se com o tempo = TRUE*/
-        pass = pass + 1;
-    }
-    vectorBalls[5].position.z += 2 * momentum[5];
+    /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
-    if(pass == 45)
+    vec = colideBall(vectorBalls[5]);
+    if(vec.equals(vecNull) == false)
     {
-        window.alert(getCenterPoint(vectorBalls[5]).z);
-    }
+        window.alert("YEEEEEEE");
+    }*/
 } 
 
 function animate() {
@@ -397,5 +409,3 @@ function animate() {
     renderer.render(scene,activeCamera);
     requestAnimationFrame(animate);
 }
-
-
