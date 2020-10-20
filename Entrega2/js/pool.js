@@ -61,19 +61,19 @@ function defineBall(){
 }
 function defineRetangleSmall()
 {
-    geometry= new THREE.BoxGeometry(7,alturaMesa,0.3);
+    geometry= new THREE.BoxGeometry(15,alturaMesa,0.3);
 }
 function defineRetangleBig()
 {
-    geometry = new THREE.BoxGeometry(0.3,alturaMesa,20);
+    geometry = new THREE.BoxGeometry(0.3,alturaMesa,30);
 }
 function defineBottomTable()
 {
-    geometry = new THREE.BoxGeometry(7,1,20);
+    geometry = new THREE.BoxGeometry(15,1,30);
 }
 function defineStick()
 {
-    geometry = new THREE.CylinderGeometry(0.25,0.125,5,64);
+    geometry = new THREE.CylinderGeometry(0.25,0.125,10,64);
 }
 function createRetangle(xCord, yCord, zCord,type) //deitado = 1 : tube lies down (45º Rotation)
 {
@@ -134,12 +134,12 @@ function createBall(xCord, yCord, zCord){
 
 function initTable(){
     defineRetangleSmall();
-    createRetangle(0,1.1,-10,1);
-    createRetangle(0,1.1,10,1);
+    createRetangle(0,1.1,-15,1);
+    createRetangle(0,1.1,15,1);
 
     defineRetangleBig();
-    createRetangle(-3.5,1.1,0,2);
-    createRetangle(3.5,1.1,0,2);
+    createRetangle(-7.5,1.1,0,2);
+    createRetangle(7.5,1.1,0,2);
 
     defineBottomTable();
     createRetangle(0,0.5,0,3);
@@ -322,7 +322,7 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-function colideBall()
+function colideBall(center)
 {
     //por fazer
 }
