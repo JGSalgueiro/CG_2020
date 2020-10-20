@@ -20,14 +20,13 @@ var speed = 5; //units a second
 var delta = 0; //starts time at 0
 var cue1,cue2,cue3,cue4,cue5,cue6,group; //groups
 var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
-var momentum = [0,0,0,0,0,0];
-var selectedCues = [0,0,0,0,0,0];
 var vectorBalls = [];
 var vectorPivots = [];
+var vectorSticks = [];
 var testVec;
 var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
-var vecNull = new THREE.Vector3();
+var vecNo = new THREE.Vector3(120,120,120);
 
 function createRenderer()
 {
@@ -117,7 +116,7 @@ function createStick(xCord, yCord, zCord, type) //deitado = 1 : tube lies down (
         stick.rotation.x = -Math.PI / 2.5;
     }
 
-    return stick;
+    vectorSticks.push(stick);
 }
 
 function createBall(xCord, yCord, zCord){
@@ -126,6 +125,7 @@ function createBall(xCord, yCord, zCord){
     ball.position.x = xCord;
     ball.position.y = yCord;
     ball.position.z = zCord;
+    ball.userData = {momentum: 0};
 
     vectorBalls.push(ball);
     scene.add(ball);
@@ -151,34 +151,40 @@ function initPivots(num)
     while( num > 0)
     {
         pivotPoint = new THREE.Object3D();
+        pivotPoint.userData = {selected: 0, onShootPosition: true};
         vectorPivots.push(pivotPoint)
         num--;
     }
+}
+function unitePivotStick()
+{
+    vectorPivots[0].add(vectorSticks[0]);
+    vectorPivots[0].position.set(2.5,alturaMesa,-5);
+    vectorPivots[1].add(vectorSticks[1]);
+    vectorPivots[1].position.set(-2.5,alturaMesa,-5);
+    vectorPivots[2].add(vectorSticks[2]);
+    vectorPivots[2].position.set(2.5,alturaMesa,5);
+    vectorPivots[3].add(vectorSticks[3]);
+    vectorPivots[3].position.set(-2.5,alturaMesa,5);
+    vectorPivots[4].add(vectorSticks[4]);
+    vectorPivots[4].position.set(0,alturaMesa,9);
+    vectorPivots[5].add(vectorSticks[5]);
+    vectorPivots[5].position.set(0,alturaMesa,-9); 
 }
 function initCues(){
     defineStick();
     initPivots();
     initPivots(6);
 
-    stick1 = createStick(3.5,1,0,0);
-    stick2 = createStick(-3.5,1,0,2);
-    stick3 = createStick(3.5,1,0,0);
-    stick4 = createStick(-3.5,1,0,2);
-    stick5 = createStick(0,1,3.5,1);
-    stick6 = createStick(0,1,-3.5,3);
+    createStick(3.5,1,0,0);
+    createStick(-3.5,1,0,2);
+    createStick(3.5,1,0,0);
+    createStick(-3.5,1,0,2);
+    createStick(0,1,3.5,1);
+    createStick(0,1,-3.5,3);
 
-    vectorPivots[0].add(stick1);
-    vectorPivots[0].position.set(2.5,alturaMesa,-5);
-    vectorPivots[1].add(stick2);
-    vectorPivots[1].position.set(-2.5,alturaMesa,-5);
-    vectorPivots[2].add(stick3);
-    vectorPivots[2].position.set(2.5,alturaMesa,5);
-    vectorPivots[3].add(stick4);
-    vectorPivots[3].position.set(-2.5,alturaMesa,5);
-    vectorPivots[4].add(stick5);
-    vectorPivots[4].position.set(0,alturaMesa,9);
-    vectorPivots[5].add(stick6);
-    vectorPivots[5].position.set(0,alturaMesa,-9);
+    unitePivotStick();
+   
     // Pivot points
     //cue1.add(pivotPoint1);
     scene.add(vectorPivots[0]);
@@ -223,6 +229,9 @@ function onResize(){
 function onKeyDown(e) { //KeyPressed
     
     switch (e.keyCode) {
+    case 32://SPACE
+        shootBalls();
+        break;
     case 49://1
         activeCamera = camera;
         break;
@@ -233,22 +242,22 @@ function onKeyDown(e) { //KeyPressed
         activeCamera = cameraSide;
         break;
     case 52: //4
-        selectedCues[0] = 1;
+        vectorPivots[0].userData.selected ^= 1;//XOR operation
         break;
     case 53: //5
-        selectedCues[1] = 1;
+        vectorPivots[1].userData.selected ^= 1;//XOR operation
         break;
     case 54: //6
-        selectedCues[2] = 1;
+        vectorPivots[2].userData.selected ^= 1;//XOR operation
         break;
     case 55: //7
-        selectedCues[3] = 1;
+        vectorPivots[3].userData.selected ^= 1;//XOR operation
         break;
     case 56: //8
-        selectedCues[4] = 1;
+        vectorPivots[4].userData.selected ^= 1;//XOR operation
         break;
     case 57: //9
-        selectedCues[5] = 1;
+        vectorPivots[5].userData.selected ^= 1;//XOR operation
         break;
     case 69:  //e
         scene.traverse(function (node) {
@@ -265,40 +274,10 @@ function onKeyDown(e) { //KeyPressed
     }
 }
 
-function onKeyUp(e) { //KeyRealeased
+/*function onKeyUp(e) { 
     switch (e.keyCode) {
-    case 81://Q
-        g1.userData.rotationClock = false;
-       break;
-    case 87://W
-        g1.userData.rotationAntiClock = false;
-       break;
-    case 65://A
-        g2.userData.rotationClock = false;
-        break;
-    case 68://D
-        g2.userData.rotationAntiClock = false;
-        break;
-    case 67://C
-        g3.userData.rotationAntiClock = false;
-        break;
-    case 90://Z
-        g3.userData.rotationClock = false;
-        break;
-    case 37:// <-
-        g1.userData.keyLeft = false;
-        break;
-    case 39:// ->
-        g1.userData.keyRight = false;
-        break;
-    case 38:// Up Key
-        g1.userData.keyUp = false
-        break;
-    case 40:// Down Key
-        g1.userData.keyDown =  false;
-        break;
     }
-}
+}*/
 function createScene()
 {
     scene = new THREE.Scene();
@@ -306,9 +285,20 @@ function createScene()
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
 
-function shootBall(num){/*bolas vao de 0-5*/
-    vectorPivots[num].position.z += 0.5;
-    momentum[num] = 0.8;
+function shootBalls(){/*Determina as bolas*/
+    var i;
+    for(i = 0; i < 6; i++)
+    {
+        if(vectorPivots[i].userData.selected == 1)
+        {
+            shootBall(i);
+        }
+    }
+}
+function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
+    vectorPivots[num].userData.onShootPosition = false;
+    vectorBalls[num].userData.momentum = 0.8;
+    /*vectorPivots[num].position.z -= 0.5;*/
 }
 
 function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
@@ -339,7 +329,7 @@ function colideBall(ball)
             return collisionCenter;
         }
     }
-    return vecNull;/*Nao ha colisao*/
+    return vecNo;/*Nao ha colisao*/
 }
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
@@ -363,41 +353,89 @@ function init() {
     //window.alert(vectorBalls[2].y);
     
 
-    window.addEventListener("keyup", onKeyUp);
+    /*window.addEventListener("keyup", onKeyUp);*/
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", onResize);
 }
+function changeCuesColor()
+{
+    for(i = 0; i < 6; i++)
+    {
+        if (vectorPivots[i].userData.selected == 1){
+            vectorSticks[i].material.color.setHex(0x8b0000);
+        }
+        else
+        {
+            vectorSticks[i].material.color.setHex(0x003297);
+        }
+    }
+}
+/*function updateSticks() Se quisermos mesmo fazer os sticcks a fazer a animação de mexer
+{
+    if(vectorPivots[0].userData.onShootPosition == 1)
+    {
+        vectorPivots[0].position.x -= 0.5;
+    }
+    else if(vectorPivots[0].userData.onShootPosition == 0)
+    {
+        vectorPivots[0].position.x += 0.5;
+    }
+    if(vectorPivots[1].userData.onShootPosition == 1)
+    {
+        vectorPivots[1].position.x += 0.5;
+    }
+    else if(vectorPivots[1].userData.onShootPosition == 0)
+    {
+        vectorPivots[1].position.x -= 0.5;
+    }
+    if(vectorPivots[2].userData.onShootPosition == 1)
+    {
+        vectorPivots[2].position.x -= 0.5;
+    }
+    else if(vectorPivots[2].userData.onShootPosition == 0)
+    {
+        vectorPivots[2].position.x += 0.5;
+    }
+    if(vectorPivots[3].userData.onShootPosition == 1)
+    {
+        vectorPivots[3].position.x += 0.5;
+    }
+    else if(vectorPivots[3].userData.onShootPosition == 0)
+    {
+        vectorPivots[3].position.x -= 0.5;
+    }
+    if(vectorPivots[4].userData.onShootPosition == 1)
+    {
+        vectorPivots[4].position.z -= 0.5;
+    }
+    else if(vectorPivots[4].userData.onShootPosition == 0)
+    {
+        vectorPivots[4].position.z += 0.5;
+    }
+    if(vectorPivots[5].userData.onShootPosition == 1)
+    {
+        vectorPivots[5].position.z += 0.5;
+    }
+    else if(vectorPivots[5].userData.onShootPosition == 0)
+    {
+        vectorPivots[5].position.z -= 0.5;
+    }
+}*/
+function updateball(){  /*Tem de dizer que o onShootPosition passa para 0*/
+}
+  
 function update()
 {
-    var vec;
+    var vec,i;
     // Update nos Selected Cues
-    if(selectedCues[0] == 1){
-        stick1.material.color.setHex(0x8b0000);
-    }
-    // Update nos Selected Cues
-    if(selectedCues[1] == 1){
-        stick2.material.color.setHex(0x8b0000);
-    }
-    // Update nos Selected Cues
-    if(selectedCues[2] == 1){
-        stick3.material.color.setHex(0x8b0000);
-    }
-    // Update nos Selected Cues
-    if(selectedCues[3] == 1){
-        stick4.material.color.setHex(0x8b0000);
-    }
-    // Update nos Selected Cues
-    if(selectedCues[4] == 1){
-        stick5.material.color.setHex(0x8b0000);
-    }
-    // Update nos Selected Cues
-    if(selectedCues[5] == 1){
-        stick6.material.color.setHex(0x8b0000);
-    }
+    changeCuesColor();
+    //updateSticks();
+    //updateBall();
+    
     /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
     vec = colideBall(vectorBalls[5]);
-    if(vec.equals(vecNull) == false)
+    if(vec.equals(vecNo) == false)
     {
         window.alert("YEEEEEEE");
     }*/
