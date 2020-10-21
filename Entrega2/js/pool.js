@@ -6,10 +6,10 @@
   +--------------------------------------------------------------------------------------+*/
 
 var scene, camera, renderer, helper, cameraTop, activeCamera, cameraSide;
-var geometry, material, materialGreen,materialBlack, materialWhite, retangle, group, materialRed;
+var geometry, material, materialGreen,materialBrown, materialWhite, retangle, group, materialBlack;
 var stick1, stick2, stick3, stick4, stick5, stick6;
 var ball1, ball2, ball3, ball4, ball5, ball6, balltest;
-var ViewSize = 75;
+var ViewSize = 50;
 var raio = 0.5;
 var alturaMesa = 2.2;
 var SCREEN_WIDTH = window.innerWidth;
@@ -28,7 +28,7 @@ var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
 var vecNo = new THREE.Vector3(120,120,120);
 var ang = 0;
-var vecRotation = new THREE.Vector3(0,0,1);
+var vecRotation = new THREE.Vector3(0,0,raio);
 
 
 function createRenderer()
@@ -41,6 +41,7 @@ function createRenderer()
 function createCamera()
 {
     camera = new THREE.OrthographicCamera(-aspect*ViewSize / 2, aspect*ViewSize / 2, ViewSize / 2, -ViewSize / 2, - 1000, 1000);
+    camera.rotation.x = -Math.PI / 2;
     camera.position.set(0,5,0);
     activeCamera = camera;
     scene.add(camera);
@@ -80,15 +81,26 @@ function defineStick()
 {
     geometry = new THREE.CylinderGeometry(0.25,0.125,10,64);
 }
+function createHole(xCord,yCord,zCord,rotation){
+    hole = new THREE.Mesh(geometry, materialBlack);
+    hole.position.x = xCord;
+    hole.position.y = yCord;
+    hole.position.z = zCord;
+
+    hole.rotation.y += rotation;
+
+    group.add(hole);
+}
+
 function createRetangle(xCord, yCord, zCord,type) //deitado = 1 : tube lies down (45º Rotation)
 {
     if(type == 1)
     {
-        retangle = new THREE.Mesh(geometry, materialBlack);
+        retangle = new THREE.Mesh(geometry, materialBrown);
     }
     else if(type == 2)
     {
-        retangle = new THREE.Mesh(geometry, materialBlack);
+        retangle = new THREE.Mesh(geometry, materialBrown);
     }
     else if(type == 3)
     {
@@ -98,6 +110,27 @@ function createRetangle(xCord, yCord, zCord,type) //deitado = 1 : tube lies down
     retangle.position.y = yCord;
     retangle.position.z = zCord;
     group.add(retangle);
+}
+function defineLegs()
+{
+    geometry = new THREE.CylinderGeometry(2,2,15,64);
+}
+function defineHole1()
+{
+    geometry = new THREE.CylinderGeometry(2,2,1.1,64,0,false,0,1.6);
+}
+function defineHole2()
+{
+    geometry = new THREE.CylinderGeometry(1.5,1.5,1.1,64,0,false,0,3.2);
+}
+function createLegs(xCord,yCord,zCord)
+{
+    leg =  new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,10,64), materialBrown);
+    leg.position.x = xCord;
+    leg.position.y = yCord;
+    leg.position.z = zCord;
+
+    group.add(leg);
 }
 function createStick(xCord, yCord, zCord, type) //deitado = 1 : tube lies down (45º Rotation)
 {
@@ -137,8 +170,23 @@ function createBall(xCord, yCord, zCord){
 
     return ball;
 }
-
 function initTable(){
+    defineLegs();
+    createLegs(7,-4.5,14.5);
+    createLegs(7,-4.5,-14.5);
+    createLegs(-7,-4.5,-14.5);
+    createLegs(-7,-4.5,14.5);
+
+    defineHole1();
+    createHole(-7.5,0.5,-15, 0);
+    createHole(-7.5,0.5, 15, Math.PI /2);
+    createHole(7.5,0.5, 15, Math.PI );
+    createHole(7.5,0.5, -15, - 5 * (Math.PI/2) );
+
+    defineHole2();
+    createHole(-7.5,0.5,0, 0);
+    createHole(7.5,0.5,0, Math.PI);
+
     defineRetangleSmall();
     createRetangle(0,1.1,-15,1);
     createRetangle(0,1.1,15,1);
@@ -325,7 +373,7 @@ function shootBalls(){/*Determina as bolas*/
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.momentum = 1.3;
+        vectorBalls[num].userData.momentum = 0.8;
     }
     vectorPivots[num].userData.selected = 0;
     /*vectorPivots[num].position.z -= 0.5;*/
@@ -347,10 +395,52 @@ function checkBallCollision(collisionCenter, center)
 {
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
-/*function checkPointColision(center, collisionCenter)
+function checkPointColision(center, collisionCenter)
 {
+    var rad = 0.0174533;
+    var i,e;
+    var x1,x2,z1,z2;
+    var bufferVec;
+    var ballPoints = [];
+    var collisionBallPoints = [];
+    var startingPointBall = center.add(vecRotation);
+    var startingPointCollisionBall = collisionCenter.add(vecRotation.negate());
+    ballPoints.push(startingPointBall);
 
-}*/
+    x1 = startingPointBall.getComponent(0); 
+    window.alert(x1);
+    z1 = startingPointBall.getComponent(2); 
+    window.alert(z1);
+    x2 = startingPointCollisionBall.getComponent(0);
+    window.alert(x2);
+    z2 = startingPointCollisionBall.getComponent(2);
+    window.alert(z2);
+    for(i = 0; i < 360; i++)
+    {
+        x1 = x1 + raio*Math.sin(rad);
+        z1 = z1 - raio*(1 - Math.cos(rad));
+        bufferVec = new THREE.Vector3(x1, 1 + raio,z1);
+        ballPoints.push(bufferVec);
+
+
+        x2 = x2 + raio*Math.sin(rad);
+        z2 = z2 - raio*(1 - Math.cos(rad));
+        bufferVec = new THREE.Vector3(x2, 1 + raio,z2);
+        collisionBallPoints.push(bufferVec);
+    }
+    for(i = 0; i < 360; i++)
+    {
+        for(e = 0; e < 360; e++)
+        {
+            if(ballPoints[i].equals(collisionBallPoints[e]))
+            {
+                window.alert("PUTAS: z" + collisionBallPoints[e].getComponent(2));
+            }
+        }
+    }
+    window.alert("cry")
+
+}
 
 function colideBall(ball)
 {
@@ -369,8 +459,9 @@ function colideBall(ball)
 }
 function init() {
     materialWhite = new THREE.MeshBasicMaterial({color: 0xffffff});
-    materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
+    materialBrown = new THREE.MeshBasicMaterial({color: 0x35281E});
     materialGreen = new THREE.MeshBasicMaterial({color: 0x0a6c03});
+    materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
     group = new THREE.Group();
 
 
@@ -386,12 +477,7 @@ function init() {
 
 
     renderer.render(scene,activeCamera);/*Tirar depois!!!!!*/
-    testVec = getCenterPoint(vectorBalls[5]);
-    //vector[0] = testVec;
-    //window.alert(vectorBalls[2].y);
-    
 
-    /*window.addEventListener("keyup", onKeyUp);*/
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", onResize);
 }
@@ -408,62 +494,11 @@ function changeCuesColor()
         }
     }
 }
-/*function updateSticks() Se quisermos mesmo fazer os sticcks a fazer a animação de mexer
-{
-    if(vectorPivots[0].userData.onShootPosition == 1)
-    {
-        vectorPivots[0].position.x -= 0.5;
-    }
-    else if(vectorPivots[0].userData.onShootPosition == 0)
-    {
-        vectorPivots[0].position.x += 0.5;
-    }
-    if(vectorPivots[1].userData.onShootPosition == 1)
-    {
-        vectorPivots[1].position.x += 0.5;
-    }
-    else if(vectorPivots[1].userData.onShootPosition == 0)
-    {
-        vectorPivots[1].position.x -= 0.5;
-    }
-    if(vectorPivots[2].userData.onShootPosition == 1)
-    {
-        vectorPivots[2].position.x -= 0.5;
-    }
-    else if(vectorPivots[2].userData.onShootPosition == 0)
-    {
-        vectorPivots[2].position.x += 0.5;
-    }
-    if(vectorPivots[3].userData.onShootPosition == 1)
-    {
-        vectorPivots[3].position.x += 0.5;
-    }
-    else if(vectorPivots[3].userData.onShootPosition == 0)
-    {
-        vectorPivots[3].position.x -= 0.5;
-    }
-    if(vectorPivots[4].userData.onShootPosition == 1)
-    {
-        vectorPivots[4].position.z -= 0.5;
-    }
-    else if(vectorPivots[4].userData.onShootPosition == 0)
-    {
-        vectorPivots[4].position.z += 0.5;
-    }
-    if(vectorPivots[5].userData.onShootPosition == 1)
-    {
-        vectorPivots[5].position.z += 0.5;
-    }
-    else if(vectorPivots[5].userData.onShootPosition == 0)
-    {
-        vectorPivots[5].position.z -= 0.5;
-    }
-}*/
 function updateBallAnimation(ball)
 {
     ball.position.z += 2*ball.userData.momentum;/* Tem de ser substituido por uma funcao q calcule a direcao do movimento*/
     ball.rotation.x += (2+ball.userData.momentum) / raio; /*roda em funcao do raio da bola*/
-    ball.userData.momentum = ball.userData.momentum/1.1;
+    ball.userData.momentum = ball.userData.momentum/1.05;
 }
 function updateWhiteBalls()
 {
@@ -483,8 +518,8 @@ function update()
     // Update nos Selected Cues
     changeCuesColor();
     //updateSticks();
+    colideBall(vectorBalls[5]);
     updateBalls();
-    
     /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
     vec = colideBall(vectorBalls[5]);
