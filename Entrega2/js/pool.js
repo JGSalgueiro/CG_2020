@@ -29,6 +29,7 @@ var pass = 0;
 var vecNo = new THREE.Vector3(120,120,120);
 var ang = 0;
 var vecRotation = new THREE.Vector3(0,0,raio);
+var vecRotation2 = new THREE.Vector3(0,0,-raio);
 
 
 function createRenderer()
@@ -391,50 +392,55 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-function checkBallCollision(collisionCenter, center)
+function checkBallCollision(collisionBall, ball)
 {
+    var collisionCenter = getCenterPoint(collisionBall);
+    var center = getCenterPoint(ball);
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
-function checkPointColision(center, collisionCenter)
+function checkPointColision(ball, collisionBall)
 {
-    var rad = 0.0174533;
+    var rad = 0.0174533;/*Precisao de 1 grau*/
+    var startAngle = 0;
     var i,e;
-    var x1,x2,z1,z2;
+    var x1,x2,z1,z2,cx,cy, cx2,cy2;
     var bufferVec;
     var ballPoints = [];
     var collisionBallPoints = [];
-    var startingPointBall = center.add(vecRotation);
-    var startingPointCollisionBall = collisionCenter.add(vecRotation.negate());
-    ballPoints.push(startingPointBall);
+    var collisionCenter = getCenterPoint(collisionBall);
+    var center = getCenterPoint(ball);
 
-    x1 = startingPointBall.getComponent(0); 
-    window.alert(x1);
-    z1 = startingPointBall.getComponent(2); 
-    window.alert(z1);
-    x2 = startingPointCollisionBall.getComponent(0);
-    window.alert(x2);
-    z2 = startingPointCollisionBall.getComponent(2);
-    window.alert(z2);
+    cx = center.getComponent(0);
+    cy = center.getComponent(2);
+    window.alert(cy+0.5);
+    cx2 = collisionCenter.getComponent(0);
+    cy2 = collisionCenter.getComponent(2);
+
     for(i = 0; i < 360; i++)
     {
-        x1 = x1 + raio*Math.sin(rad);
-        z1 = z1 - raio*(1 - Math.cos(rad));
+        x1 = Math.round((cx + raio*Math.cos(startAngle + rad))*100) / 100;
+        z1 = Math.round((cy + raio*Math.sin(startAngle + rad))*100) / 100;
         bufferVec = new THREE.Vector3(x1, 1 + raio,z1);
         ballPoints.push(bufferVec);
 
 
-        x2 = x2 + raio*Math.sin(rad);
-        z2 = z2 - raio*(1 - Math.cos(rad));
+        x2 = Math.round((cx2 + raio*Math.cos(startAngle + rad))* 100) /100;
+        z2 = Math.round((cy2 + raio*Math.sin(startAngle + rad))*100) /100;
         bufferVec = new THREE.Vector3(x2, 1 + raio,z2);
         collisionBallPoints.push(bufferVec);
+        startAngle += rad;
     }
     for(i = 0; i < 360; i++)
     {
         for(e = 0; e < 360; e++)
         {
+            /*window.alert("YO Z:" + collisionBallPoints[e].getComponent(2));*/
             if(ballPoints[i].equals(collisionBallPoints[e]))
             {
-                window.alert("PUTAS: z" + collisionBallPoints[e].getComponent(2));
+                window.alert("PUTAS: z" + collisionBallPoints[e].getComponent(2) +
+                            "PUTAS: x" + collisionBallPoints[e].getComponent(0)
+                            +"A: z" + ballPoints[i].getComponent(2) +
+                            "A: x" + ballPoints[i].getComponent(0));
             }
         }
     }
@@ -448,11 +454,11 @@ function colideBall(ball)
     center = getCenterPoint(ball);
     for(i = 0; i <= 5; i++)
     {
-        collisionCenter = getCenterPoint(vectorBalls[i]);
-        if(checkBallCollision(collisionCenter, center))
+        //collisionCenter = getCenterPoint(vectorBalls[i]);
+        if(checkBallCollision(vectorBalls[i], ball))
         {
-            checkPointColision(center,collisionCenter);
-            return collisionCenter;
+            checkPointColision(ball,vectorBalls[i]);
+            return ;
         }
     }
     return vecNo;/*Nao ha colisao*/
