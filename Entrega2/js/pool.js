@@ -410,6 +410,7 @@ function checkPointColision(ball, collisionBall)
     var collisionCenter = getCenterPoint(collisionBall);
     var center = getCenterPoint(ball);
 
+    
     cx = center.getComponent(0);
     cy = center.getComponent(2);
     window.alert(cy+0.5);
