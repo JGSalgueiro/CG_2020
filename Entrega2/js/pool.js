@@ -164,7 +164,7 @@ function createBall(xCord, yCord, zCord){
     ball.position.x = xCord;
     ball.position.y = yCord;
     ball.position.z = zCord;
-    ball.userData = {momentum: 0};
+    ball.userData = {momentum: 0,direction: new THREE.Vector3(0,0,0)};
 
     vectorBalls.push(ball);
     scene.add(ball);
@@ -361,15 +361,25 @@ function createScene()
     scene.add(new THREE.AxisHelper(50));  //Axis with 50 length
 }
 
-function shootBalls(){/*Determina as bolas*/
-    var i;
+function shootBalls(){/Determina as bolas/
+    var i, dir = new THREE.Vector3();
     for(i = 0; i < 6; i++)
     {
         if(vectorPivots[i].userData.selected == 1)
         {
+            centerBall = getCenterPoint(vectorBalls[i]);
+            //window.alert("Center BOLA:" + i + "->"+ "x" + centerBall.getComponent(0)+ "y" + centerBall.getComponent(1)+ "Z" + centerBall.getComponent(2));
+            centerCue = getCenterPoint(vectorSticks[i]);
+            centerCue.setY(1.5);/*Ficar da mesma altura da bola de snooker*/
+
+            vectorBalls[i].userData.direction.copy(dir.subVectors(centerBall,centerCue).normalize());
+           
             shootBall(i);
         }
+        //window.alert("new ball");
     }
+    //window.alert("BOLA:" + 0 + "->"+ "x" + vectorBalls[0].userData.direction.getComponent(0)+ "y" + vectorBalls[0].userData.direction.getComponent(1)+ "Z" + vectorBalls[0].userData.direction.getComponent(2));
+    //window.alert("BOLA:" + 5 + "->"+ "x" + vectorBalls[5].userData.direction.getComponent(0)+ "y" + vectorBalls[5].userData.direction.getComponent(1)+ "Z" + vectorBalls[5].userData.direction.getComponent(2));
 }
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     if(vectorPivots[num].userData.onShootPosition == true){
@@ -392,19 +402,37 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-function checkBallCollision(collisionBall, ball)
+function checkBallCollision(collisionCenter, center)
 {
-    var collisionCenter = getCenterPoint(collisionBall);
-    var center = getCenterPoint(ball);
+
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
-function correctBallPosition(ball, collisionBall)/* Mexer em funcao do vetor de movimento*/
+/*function translateOnAxisSphere(ball,vec, distance)
+{
+    ball.position.x += vec.getComponent(0)*distance;
+    ball.position.y += vec.getComponent(1)*distance;
+    ball.position.z += vec.getComponent(2)*distance;
+}*/
+function correctBallPosition(ball, collisionBall)
 {
     var collisionCenter;
-    var center;
+    var center, vecTrans;
+    vecTrans = ball.userData.direction;
     collisionCenter = getCenterPoint(collisionBall);
+    //window.alert("x" + vecTrans.getComponent(0) + "z" + vecTrans.getComponent(2));
     center = getCenterPoint(ball);
-
+    center.addScaledVector(vecTrans,-0.1);
+    ball.translateOnAxis(vecTrans,-0.1);
+    while(checkBallCollision(collisionCenter, center) == true)
+    {
+        center.addScaledVector(vecTrans,-0.1);
+        ball.translateOnAxis(vecTrans,-0.1);
+    }
+    center.addScaledVector(vecTrans,0.1);//Para voltar a estar em contacto com a colllision ball
+    ball.translateOnAxis(vecTrans,0.1);
+    //window.alert("x" + collisionCenter.getComponent(0)+ "y" + collisionCenter.getComponent(1)+ "Z" + collisionCenter.getComponent(2));
+    //window.alert("x" + center.getComponent(0)+ "y" + center.getComponent(1)+ "Z" + center.getComponent(2));
+    return center;
 }
 
 function checkPointColision(ball, collisionBall)
@@ -413,22 +441,22 @@ function checkPointColision(ball, collisionBall)
     var startAngle = 0;
     var i,e;
     var x1,x2,z1,z2,cx,cy, cx2,cy2;
-    var bufferVec;
+    var bufferVec,realVec;
     var ballPoints = [];
     var collisionBallPoints = [];
+    var candidates = [];
     var collisionCenter;
     var center;
 
-    correctBallPosition(ball,collisionBall);
+    center = correctBallPosition(ball,collisionBall);
     collisionCenter = getCenterPoint(collisionBall);
-    center = getCenterPoint(ball);
     cx = center.getComponent(0);
     cy = center.getComponent(2);
-    window.alert(cy+0.5);
+    //window.alert(cy+0.5);
     cx2 = collisionCenter.getComponent(0);
     cy2 = collisionCenter.getComponent(2);
 
-    for(i = 0; i < 360; i++)
+    for(i = 0; i < 360; i++)/* Criar todos os pontos das duas esferas no plano y = 1 + raio (zona de intersecao)*/
     {
         x1 = Math.round((cx + raio*Math.cos(startAngle + rad))*100) / 100;
         z1 = Math.round((cy + raio*Math.sin(startAngle + rad))*100) / 100;
@@ -449,27 +477,57 @@ function checkPointColision(ball, collisionBall)
             /*window.alert("YO Z:" + collisionBallPoints[e].getComponent(2));*/
             if(ballPoints[i].equals(collisionBallPoints[e]))
             {
-                window.alert("PUTAS: z" + collisionBallPoints[e].getComponent(2) +
-                            "PUTAS: x" + collisionBallPoints[e].getComponent(0)
-                            +"A: z" + ballPoints[i].getComponent(2) +
-                            "A: x" + ballPoints[i].getComponent(0));
+                candidates.push(ballPoints[i]);
+                
             }
         }
     }
-    window.alert("cry")
+    realVec = calculateRealVec(candidates);
+    return realVec;
+}
+function calculateRealVec(candidates)
+{
+    var x = 0,z = 0,i;
+    var length = candidates.length;/*Fazer media*/
+    for(i = 0; i < length; i++)
+    {
+        x += candidates[i].getComponent(0);
+        z += candidates[i].getComponent(2);
+    }
+    //window.alert("YOYOYO"+"x"+x/length+"z"+z/length);
+    return new THREE.Vector3(x/length,1 + raio, z/length);
 
 }
-
+function updateCollisionBallStats(collisionBall, point,momentum)
+{
+    var dir = new THREE.Vector3();
+    var center = getCenterPoint(collisionBall);
+    dir.subVectors(center,point).normalize();
+    //window.alert("X" + dir.getComponent(0)+ "Y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
+    collisionBall.userData.direction = dir;
+    collisionBall.userData.momentum = 0.6;
+}
+function updateBallStats(ball, point,momentum)
+{
+    var dir = new THREE.Vector3();
+    var center = getCenterPoint(ball);
+    dir.subVectors(center,point).normalize();
+    //window.alert("X" + dir.getComponent(0)+ "Y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
+    ball.userData.direction = dir;
+    ball.userData.momentum = 0.6;
+}
 function colideBall(ball)
 {
-    var i, collisionCenter, center;
+    var i, collisionCenter, center,collisionPoint;
     center = getCenterPoint(ball);
     for(i = 0; i <= 5; i++)
     {
-        //collisionCenter = getCenterPoint(vectorBalls[i]);
-        if(checkBallCollision(vectorBalls[i], ball))
+        collisionCenter = getCenterPoint(vectorBalls[i]);
+        if(checkBallCollision(collisionCenter, center))
         {
-            checkPointColision(ball,vectorBalls[i]);
+            collisionPoint = checkPointColision(ball,vectorBalls[i]);
+            updateCollisionBallStats(vectorBalls[i], collisionPoint,ball.userData.momentum);
+            updateBallStats(ball, collisionPoint,ball.userData.momentum);
             return ;
         }
     }
@@ -512,9 +570,15 @@ function changeCuesColor()
         }
     }
 }
+function updateBallPosition(ball)
+{
+    ball.position.x += 2*ball.userData.momentum*ball.userData.direction.getComponent(0);
+    ball.position.z += 2*ball.userData.momentum*ball.userData.direction.getComponent(2);
+}
 function updateBallAnimation(ball)
 {
-    ball.position.z += 2*ball.userData.momentum;/* Tem de ser substituido por uma funcao q calcule a direcao do movimento*/
+    updateBallPosition(ball);
+    //ball.position.z += 2*ball.userData.momentum;
     ball.rotation.x += (2+ball.userData.momentum) / raio; /*roda em funcao do raio da bola*/
     ball.userData.momentum = ball.userData.momentum/1.05;
 }
@@ -537,6 +601,7 @@ function update()
     changeCuesColor();
     //updateSticks();
     colideBall(vectorBalls[5]);
+    colideBall(vectorBalls[0]);
     updateBalls();
     /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
