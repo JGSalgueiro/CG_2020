@@ -30,6 +30,7 @@ var vecNo = new THREE.Vector3(120,120,120);
 var ang = 0;
 var vecRotation = new THREE.Vector3(0,0,1);
 
+
 function createRenderer()
 {
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -346,6 +347,11 @@ function checkBallCollision(collisionCenter, center)
 {
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
+/*function checkPointColision(center, collisionCenter)
+{
+
+}*/
+
 function colideBall(ball)
 {
     var i, collisionCenter, center;
@@ -355,6 +361,7 @@ function colideBall(ball)
         collisionCenter = getCenterPoint(vectorBalls[i]);
         if(checkBallCollision(collisionCenter, center))
         {
+            checkPointColision(center,collisionCenter);
             return collisionCenter;
         }
     }
@@ -376,6 +383,8 @@ function init() {
     initCues();
     initTable();
     initBalls();
+
+
     renderer.render(scene,activeCamera);/*Tirar depois!!!!!*/
     testVec = getCenterPoint(vectorBalls[5]);
     //vector[0] = testVec;
