@@ -398,6 +398,15 @@ function checkBallCollision(collisionBall, ball)
     var center = getCenterPoint(ball);
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
+function correctBallPosition(ball, collisionBall)/* Mexer em funcao do vetor de movimento*/
+{
+    var collisionCenter;
+    var center;
+    collisionCenter = getCenterPoint(collisionBall);
+    center = getCenterPoint(ball);
+
+}
+
 function checkPointColision(ball, collisionBall)
 {
     var rad = 0.0174533;/*Precisao de 1 grau*/
@@ -407,10 +416,12 @@ function checkPointColision(ball, collisionBall)
     var bufferVec;
     var ballPoints = [];
     var collisionBallPoints = [];
-    var collisionCenter = getCenterPoint(collisionBall);
-    var center = getCenterPoint(ball);
+    var collisionCenter;
+    var center;
 
-    
+    correctBallPosition(ball,collisionBall);
+    collisionCenter = getCenterPoint(collisionBall);
+    center = getCenterPoint(ball);
     cx = center.getComponent(0);
     cy = center.getComponent(2);
     window.alert(cy+0.5);
