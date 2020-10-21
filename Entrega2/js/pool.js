@@ -9,7 +9,7 @@ var scene, camera, renderer, helper, cameraTop, activeCamera, cameraSide;
 var geometry, material, materialGreen,materialBlack, materialWhite, retangle, group, materialRed;
 var stick1, stick2, stick3, stick4, stick5, stick6;
 var ball1, ball2, ball3, ball4, ball5, ball6, balltest;
-var ViewSize = 50;
+var ViewSize = 75;
 var raio = 0.5;
 var alturaMesa = 2.2;
 var SCREEN_WIDTH = window.innerWidth;
@@ -45,9 +45,11 @@ function createCamera()
 }
 function createCameraTop()
 {
-    cameraTop = new THREE.OrthographicCamera(-aspect*ViewSize / 2, aspect*ViewSize / 2, ViewSize / 2, -ViewSize / 2, - 1000, 1000);
-    cameraTop.rotation.x = -Math.PI / 2;
-    cameraTop.position.set(0,5,0);
+    cameraTop = new THREE.PerspectiveCamera( 30, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 1000 );
+    cameraTop.position.set(30,30,25);
+    cameraTop.rotation.x = -Math.PI / 4;
+    cameraTop.rotation.y = +Math.PI / 4;
+    cameraTop.rotation.z = +Math.PI / 4;
     scene.add(cameraTop);
 }
 function createCameraSide()
@@ -160,29 +162,29 @@ function initPivots(num)
 function unitePivotStick()
 {
     vectorPivots[0].add(vectorSticks[0]);
-    vectorPivots[0].position.set(2.5,alturaMesa,-5);
+    vectorPivots[0].position.set(6,alturaMesa,-7.5);
     vectorPivots[1].add(vectorSticks[1]);
-    vectorPivots[1].position.set(-2.5,alturaMesa,-5);
+    vectorPivots[1].position.set(-6,alturaMesa,-7.5);
     vectorPivots[2].add(vectorSticks[2]);
-    vectorPivots[2].position.set(2.5,alturaMesa,5);
+    vectorPivots[2].position.set(6,alturaMesa,7.5);
     vectorPivots[3].add(vectorSticks[3]);
-    vectorPivots[3].position.set(-2.5,alturaMesa,5);
+    vectorPivots[3].position.set(-6,alturaMesa,7.5);
     vectorPivots[4].add(vectorSticks[4]);
-    vectorPivots[4].position.set(0,alturaMesa,9);
+    vectorPivots[4].position.set(0,alturaMesa,12);
     vectorPivots[5].add(vectorSticks[5]);
-    vectorPivots[5].position.set(0,alturaMesa,-9); 
+    vectorPivots[5].position.set(0,alturaMesa,-12); 
 }
 function initCues(){
     defineStick();
     initPivots();
     initPivots(6);
 
-    createStick(3.5,1,0,0);
-    createStick(-3.5,1,0,2);
-    createStick(3.5,1,0,0);
-    createStick(-3.5,1,0,2);
-    createStick(0,1,3.5,1);
-    createStick(0,1,-3.5,3);
+    createStick(5.5,1.5,0,0);
+    createStick(-5.5,1.5,0,2);
+    createStick(5.5,1.5,0,0);
+    createStick(-5.5,1.5,0,2);
+    createStick(0,1.6,7.5,1);
+    createStick(0,1.6,-7.5,3);
 
     unitePivotStick();
    
@@ -203,12 +205,12 @@ function initCues(){
 }
 function initBalls(){
     defineBall();
-    createBall(2.5,1 + raio,-5);//Ball0
-    createBall(-2.5,1 + raio,-5);//Ball1
-    createBall(2.5,1 + raio,5);//Ball2
-    createBall(-2.5,1 + raio,5);//Ball3
-    createBall(0,1 + raio,9);//Ball4
-    createBall(0,1 + raio,-9);//Ball5
+    createBall(6,1 + raio,-7.5);//Ball0
+    createBall(-6,1 + raio,-7.5);//Ball1
+    createBall(6,1 + raio,7.5);//Ball2
+    createBall(-6,1 + raio,7.5);//Ball3
+    createBall(0,1 + raio,14);//Ball4
+    createBall(0,1 + raio,-14);//Ball5
 
     /*scene.add(ball1);
     scene.add(ball2);
@@ -319,8 +321,12 @@ function shootBalls(){/*Determina as bolas*/
     }
 }
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
-    vectorPivots[num].userData.onShootPosition = false;
-    vectorBalls[num].userData.momentum = 0.8;
+    if(vectorPivots[num].userData.onShootPosition == true){
+        vectorPivots[num].userData.onShootPosition = false;
+        vectorBalls[num].userData.momentum = 0.8;
+        vectorPivots[num].userData.selected = 0;
+
+    }
     /*vectorPivots[num].position.z -= 0.5;*/
 }
 
@@ -444,7 +450,22 @@ function changeCuesColor()
         vectorPivots[5].position.z -= 0.5;
     }
 }*/
-function updateball(){  /*Tem de dizer que o onShootPosition passa para 0*/
+function updateBallAnimation(ball)
+{
+    ball.position.z += 2*ball.userData.momentum;/* Tem de ser substituido por uma funcao q calcule a direcao do movimento*/
+    ball.rotation.x += (2+ball.userData.momentum) / raio; /*roda em funcao do raio da bola*/
+    ball.userData.momentum = ball.userData.momentum/1.1;
+}
+function updateWhiteBalls()
+{
+    var i;
+    for(i = 0; i < 6; i++)
+    {
+        updateBallAnimation(vectorBalls[i]);
+    }
+}
+function updateBalls(){  /*Tem de dizer que o onShootPosition passa para 0*/
+    updateWhiteBalls();
 }
   
 function update()
@@ -453,7 +474,7 @@ function update()
     // Update nos Selected Cues
     changeCuesColor();
     //updateSticks();
-    //updateBall();
+    updateBalls();
     
     /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
