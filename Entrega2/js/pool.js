@@ -28,6 +28,7 @@ var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
 var vecNo = new THREE.Vector3(120,120,120);
 var ang = 0;
+var vecRotation = new THREE.Vector3(0,0,1);
 
 function createRenderer()
 {
@@ -323,10 +324,9 @@ function shootBalls(){/*Determina as bolas*/
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.momentum = 0.8;
-        vectorPivots[num].userData.selected = 0;
-
+        vectorBalls[num].userData.momentum = 1.3;
     }
+    vectorPivots[num].userData.selected = 0;
     /*vectorPivots[num].position.z -= 0.5;*/
 }
 
