@@ -164,7 +164,7 @@ function createBall(xCord, yCord, zCord){
     ball.position.x = xCord;
     ball.position.y = yCord;
     ball.position.z = zCord;
-    ball.userData = {momentum: 0,direction: new THREE.Vector3(0,0,0)};
+    ball.userData = {momentum: 0, collision: -1 ,direction: new THREE.Vector3(0,0,0)};
 
     vectorBalls.push(ball);
     scene.add(ball);
@@ -314,7 +314,7 @@ function onKeyDown(e) { //KeyPressed
         vectorPivots[5].userData.selected ^= 1;//XOR operation
         break;
     //---------------------------------------------------------
-    case 37: // Left key
+   case 37: // Left key
         if(ang >= -60 && ang <= 60){
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
@@ -337,7 +337,7 @@ function onKeyDown(e) { //KeyPressed
                 }
             }
         }
-        break;
+        break
     //---------------------------------------------------------
     case 69:  //e
         scene.traverse(function (node) {
@@ -377,7 +377,8 @@ function shootBalls(){/Determina as bolas/
             centerCue.setY(1.5);/*Ficar da mesma altura da bola de snooker*/
 
             vectorBalls[i].userData.direction.copy(dir.subVectors(centerBall,centerCue).normalize());
-           
+            dir.subVectors(centerBall,centerCue).normalize()
+            //window.alert("direction bola:" + i + "->"+ "x" + dir.getComponent(0)+ "y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
             shootBall(i);
         }
         //window.alert("new ball");
@@ -406,24 +407,11 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
-
-function checkBallCollision(collisionCenter, center)
+function checkBallCollision(collisionCenter, center)/*raio sera o raio da bolas standart*/
 {
+
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
-
-//COLISION WITH WALL (REFLECTS VECTOR)
-function colidesWithWall(vector, wallNum){
-    if(wallNum == 1){ // Z axis Wall
-        vector[0] = -vector[0];
-    }
-    if(wallNum == 2){ //X axis Wall
-        vector[2] = -vector[2];
-    }
-    return vector;
-}
-
-
 /*function translateOnAxisSphere(ball,vec, distance)
 {
     ball.position.x += vec.getComponent(0)*distance;
@@ -515,19 +503,29 @@ function calculateRealVec(candidates)
     return new THREE.Vector3(x/length,1 + raio, z/length);
 
 }
-function updateCollisionBallStats(collisionBall, point,momentum)
+/*function updateCollisionBallStats(collisionBall, point,momentum)
 {
     var dir = new THREE.Vector3();
     var center = getCenterPoint(collisionBall);
     dir.subVectors(center,point).normalize();
-    //window.alert("X" + dir.getComponent(0)+ "Y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
     collisionBall.userData.direction = dir;
     collisionBall.userData.momentum = 0.6;
+}*/
+//COLISION WITH WALL (REFLECTS VECTOR)
+function colidesWithWall(vector, wallNum){
+    if(wallNum == 1){ // Z axis Wall
+        vector[0] = -vector[0];
+    }
+    if(wallNum == 2){ //X axis Wall
+        vector[2] = -vector[2];
+    }
+    return vector;
 }
 function updateBallStats(ball, point,momentum)
 {
     var dir = new THREE.Vector3();
     var center = getCenterPoint(ball);
+    
     dir.subVectors(center,point).normalize();
     //window.alert("X" + dir.getComponent(0)+ "Y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
     ball.userData.direction = dir;
@@ -542,10 +540,14 @@ function colideBall(ball)
         collisionCenter = getCenterPoint(vectorBalls[i]);
         if(checkBallCollision(collisionCenter, center))
         {
-            collisionPoint = checkPointColision(ball,vectorBalls[i]);
-            updateCollisionBallStats(vectorBalls[i], collisionPoint,ball.userData.momentum);
-            updateBallStats(ball, collisionPoint,ball.userData.momentum);
-            return ;
+            if(ball.userData.collision == -1){
+                ball.userData.collision = i;
+                vectorBalls[i].userData.collision = i;
+                collisionPoint = checkPointColision(ball,vectorBalls[i]);
+                updateBallStats(vectorBalls[i], collisionPoint,ball.userData.momentum);//update collision ball
+                updateBallStats(ball, collisionPoint,ball.userData.momentum);
+                return ;
+            }
         }
     }
     return vecNo;/*Nao ha colisao*/
@@ -590,6 +592,7 @@ function changeCuesColor()
 function updateBallPosition(ball)
 {
     ball.position.x += 2*ball.userData.momentum*ball.userData.direction.getComponent(0);
+    ball.position.y = 1 + raio;
     ball.position.z += 2*ball.userData.momentum*ball.userData.direction.getComponent(2);
 }
 function updateBallAnimation(ball)
@@ -610,15 +613,25 @@ function updateWhiteBalls()
 function updateBalls(){  /*Tem de dizer que o onShootPosition passa para 0*/
     updateWhiteBalls();
 }
-  
+function resetCollisionFlag(){ 
+    var i;
+    for(i = 0; i < 6; i++)
+    {
+        vectorBalls[i].userData.collision = -1;
+    }
+
+}
 function update()
 {
     var vec,i;
+    // Update nos Selected Cues
     changeCuesColor();
     //updateSticks();
-    colideBall(vectorBalls[5]);
     colideBall(vectorBalls[0]);
+    colideBall(vectorBalls[5]);
     updateBalls();
+    resetCollisionFlag();
+
     /*vectorBalls[5].position.z += 2 * momentum[5];
     momentum[5] = momentum[5]/1.10;
     vec = colideBall(vectorBalls[5]);
