@@ -373,7 +373,7 @@ function shootBalls(){/Determina as bolas/
         {
             centerBall = getCenterPoint(vectorBalls[i]);
             //window.alert("Center BOLA:" + i + "->"+ "x" + centerBall.getComponent(0)+ "y" + centerBall.getComponent(1)+ "Z" + centerBall.getComponent(2));
-            centerCue = getCenterPoint(vectorSticks[i]);
+            centerCue = getCenterPointStick(vectorSticks[i]);
             centerCue.setY(1.5);/*Ficar da mesma altura da bola de snooker*/
 
             vectorBalls[i].userData.direction.copy(dir.subVectors(centerBall,centerCue).normalize());
@@ -395,7 +395,7 @@ function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     /*vectorPivots[num].position.z -= 0.5;*/
 }
 
-function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
+function getCenterPointStick(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
     var middle = new THREE.Vector3();
     var geometry = mesh.geometry;
 
@@ -406,6 +406,10 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     middle.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
     mesh.localToWorld( middle );
     return middle;
+}
+function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render IDKW*/
+    
+    return new THREE.Vector3(mesh.position.x,1+raio, mesh.position.z);
 }
 function checkBallCollision(collisionCenter, center)/*raio sera o raio da bolas standart*/
 {
@@ -452,8 +456,17 @@ function checkPointColision(ball, collisionBall)
     var candidates = [];
     var collisionCenter;
     var center;
+    var vecNull = new THREE.Vector3(0,0,0);
+    var vecTrans;
 
-    center = correctBallPosition(ball,collisionBall);
+    //window.alert("entrei");
+    vecTrans = ball.userData.direction;
+    if(vecTrans.equals(vecNull))
+    {
+        ball.userData.direction = collisionBall.userData.direction.negate();/*Dar um vetor de movimento para a bola*/
+    }
+    center = correctBallPosition(ball,collisionBall);/*A bola foi a que colidiu*/
+    //window.alert("tenho real center");
     collisionCenter = getCenterPoint(collisionBall);
     cx = center.getComponent(0);
     cy = center.getComponent(2);
@@ -465,12 +478,16 @@ function checkPointColision(ball, collisionBall)
     {
         x1 = Math.round((cx + raio*Math.cos(startAngle + rad))*100) / 100;
         z1 = Math.round((cy + raio*Math.sin(startAngle + rad))*100) / 100;
+        //x1 = cx + raio*Math.cos(startAngle + rad);
+        //z1 = cy + raio*Math.sin(startAngle + rad);
         bufferVec = new THREE.Vector3(x1, 1 + raio,z1);
         ballPoints.push(bufferVec);
 
 
         x2 = Math.round((cx2 + raio*Math.cos(startAngle + rad))* 100) /100;
         z2 = Math.round((cy2 + raio*Math.sin(startAngle + rad))*100) /100;
+        //x2 = cx2 + raio*Math.cos(startAngle + rad);
+        //z2 = cy2 + raio*Math.sin(startAngle + rad);
         bufferVec = new THREE.Vector3(x2, 1 + raio,z2);
         collisionBallPoints.push(bufferVec);
         startAngle += rad;
@@ -541,15 +558,19 @@ function colideBall(ball)
         if(checkBallCollision(collisionCenter, center))
         {
             if(ball.userData.collision == -1){
+                //window.alert("ye");
                 ball.userData.collision = i;
                 vectorBalls[i].userData.collision = i;
                 collisionPoint = checkPointColision(ball,vectorBalls[i]);
+                //window.alert("tenho collisionPoint");
                 updateBallStats(vectorBalls[i], collisionPoint,ball.userData.momentum);//update collision ball
                 updateBallStats(ball, collisionPoint,ball.userData.momentum);
+                //window.alert("saiu");
                 return ;
             }
         }
     }
+
     return vecNo;/*Nao ha colisao*/
 }
 function init() {
@@ -628,6 +649,10 @@ function update()
     changeCuesColor();
     //updateSticks();
     colideBall(vectorBalls[0]);
+    colideBall(vectorBalls[1]);
+    colideBall(vectorBalls[2]);
+    colideBall(vectorBalls[3]);
+    colideBall(vectorBalls[4]);
     colideBall(vectorBalls[5]);
     updateBalls();
     resetCollisionFlag();
