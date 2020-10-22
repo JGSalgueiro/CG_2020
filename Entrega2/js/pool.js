@@ -29,9 +29,12 @@ var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
 var vecNo = new THREE.Vector3(120,120,120);
 var ang = 0;
+var numberOfRandomBalls = 15;
 var vecRotation = new THREE.Vector3(0,0,raio);
 var vecRotation2 = new THREE.Vector3(0,0,-raio);
-
+var randomPositions = [];
+var line1 = [], line2 = [], line3 = [], line4 = [];
+var test;
 
 function createRenderer()
 {
@@ -50,7 +53,7 @@ function createCamera()
 }
 function createCameraTop()
 {
-    cameraTop = new THREE.PerspectiveCamera( 30, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 1000 );
+    cameraTop = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 1000 );
     cameraTop.position.set(30,30,25);
     cameraTop.rotation.x = -Math.PI / 4;
     cameraTop.rotation.y = +Math.PI / 4;
@@ -63,6 +66,38 @@ function createCameraSide()
     cameraSide.rotation.y = Math.PI / 2;
     cameraSide.position.set(0,5,0);
     scene.add(cameraSide);
+}
+function initRandom(){
+    randomPositions[0] = line1;
+    randomPositions[1] = line2;
+    randomPositions[2] = line3;
+    randomPositions[3] = line4;
+
+
+    for(i = 0; i < 4; i++){
+        for(j = 0; j < 7; j++){
+            randomPositions[i][j] = 0;
+        }
+    }
+
+}
+function createRandom(){
+    var num = 0, r;
+    test = 0;
+    while(test != numberOfRandomBalls){
+        for(i=0; i < 4; i++){
+            for(j = 0; j < 7; j++){
+                r = Math.floor(Math.random() * 11);
+                if(r < 5 && randomPositions[i][j] == 0 && test <= numberOfRandomBalls){
+                    randomPositions[i][j] = 1;
+                    test++;
+                    if(test == numberOfRandomBalls){
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 function defineBall(){
     geometry = new THREE.SphereGeometry(raio,32,32);
@@ -257,6 +292,21 @@ function initCues(){
     scene.add(stick5);
     scene.add(stick6);*/
 }
+function createRandomBalls(){
+    var x = -3, z = -6;
+
+    for(i = 0; i < 4; i++){
+        z = -6;
+        for(j = 0; j < 7; j++){
+            if(randomPositions[i][j] == 1){
+                createBall(x, 1 + raio, z);
+            }
+            z += 2;
+        }
+        x += 2;
+    }
+}
+
 function initBalls(){
     defineBall();
     createBall(6,1 + raio,-7.5);//Ball0
@@ -265,6 +315,8 @@ function initBalls(){
     createBall(-6,1 + raio,7.5);//Ball3
     createBall(0,1 + raio,14);//Ball4
     createBall(0,1 + raio,-14);//Ball5
+
+    createRandomBalls();
 
     /*scene.add(ball1);
     scene.add(ball2);
@@ -593,7 +645,7 @@ function colideBall(ball)
     colideWall(ball);
 
 
-    for(i = 0; i <= 5; i++)
+    for(i = 0; i < 21; i++)
     {
         collisionCenter = getCenterPoint(vectorBalls[i]);
         if(checkBallCollision(collisionCenter, center))
@@ -628,6 +680,10 @@ function init() {
     materialBlack = new THREE.MeshBasicMaterial({color: 0x000000});
     group = new THREE.Group();
 
+    initRandom();
+    createRandom();
+
+    window.alert(test);
 
     createScene();
     createRenderer();
@@ -685,7 +741,7 @@ function updateBallAnimation(ball)
 function updateWhiteBalls()
 {
     var i;
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 21; i++)
     {
         updateBallAnimation(vectorBalls[i]);
     }
@@ -695,7 +751,7 @@ function updateBalls(){  /*Tem de dizer que o onShootPosition passa para 0*/
 }
 function resetCollisionFlag(){ 
     var i;
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 21; i++)
     {
         vectorBalls[i].userData.collision = -1;
     }
@@ -707,12 +763,9 @@ function update()
     // Update nos Selected Cues
     changeCuesColor();
     //updateSticks();
-    colideBall(vectorBalls[0]);
-    colideBall(vectorBalls[1]);
-    colideBall(vectorBalls[2]);
-    colideBall(vectorBalls[3]);
-    colideBall(vectorBalls[4]);
-    colideBall(vectorBalls[5]);
+    for(i = 0; i < 21; i++){
+        colideBall(vectorBalls[i]);
+    }
     updateBalls();
     resetCollisionFlag();
 
