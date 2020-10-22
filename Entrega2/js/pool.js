@@ -665,7 +665,7 @@ function updateBallPosition(ball)
     ball.position.x += 2*ball.userData.momentum*ball.userData.direction.getComponent(0);
     ball.position.z += 2*ball.userData.momentum*ball.userData.direction.getComponent(2);
     if(ball.userData.falling){
-        ball.position.y = 4*ball.userData.momentum*ball.userData.direction.getComponent(1);
+        ball.position.y += 2*ball.userData.momentum*ball.userData.direction.getComponent(1);
         //window.alert(ball.userData.direction.getComponent(1));
         //window.alert(ball.userData.momentum);
     }
