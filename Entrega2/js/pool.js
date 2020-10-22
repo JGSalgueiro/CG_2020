@@ -318,8 +318,10 @@ function onKeyDown(e) { //KeyPressed
         if(ang >= -60 && ang <= 60){
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
-                    vectorPivots[i].rotation.y += 0.05;
-                    ang += 0.05
+                    if(ang < Math.PI/3){
+                        vectorPivots[i].rotation.y += (Math.PI/3) * delta;
+                        ang += (Math.PI/3) * delta;
+                    }
                 }
             }
         }
@@ -328,8 +330,10 @@ function onKeyDown(e) { //KeyPressed
         if(ang >= -60 && ang <= 60){
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
-                    vectorPivots[i].rotation.y -= 0.05;
-                    ang -= 0.05
+                    if(ang >= -Math.PI/3){
+                        vectorPivots[i].rotation.y -= (Math.PI/3) * delta;
+                        ang -= (Math.PI/3) * delta;
+                    }
                 }
             }
         }
@@ -402,11 +406,24 @@ function getCenterPoint(mesh) {/*Funcao so funciona depois de se fazer render ID
     mesh.localToWorld( middle );
     return middle;
 }
+
 function checkBallCollision(collisionCenter, center)
 {
-
     return (collisionCenter.distanceToSquared(center) <= (raio*raio*4)) && (collisionCenter.equals(center) == false);
 }
+
+//COLISION WITH WALL (REFLECTS VECTOR)
+function colidesWithWall(vector, wallNum){
+    if(wallNum == 1){ // Z axis Wall
+        vector[0] = -vector[0];
+    }
+    if(wallNum == 2){ //X axis Wall
+        vector[2] = -vector[2];
+    }
+    return vector;
+}
+
+
 /*function translateOnAxisSphere(ball,vec, distance)
 {
     ball.position.x += vec.getComponent(0)*distance;
@@ -597,7 +614,6 @@ function updateBalls(){  /*Tem de dizer que o onShootPosition passa para 0*/
 function update()
 {
     var vec,i;
-    // Update nos Selected Cues
     changeCuesColor();
     //updateSticks();
     colideBall(vectorBalls[5]);
