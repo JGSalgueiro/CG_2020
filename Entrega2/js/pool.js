@@ -667,6 +667,7 @@ function updateBallPosition(ball)
     if(ball.userData.falling){
         ball.position.y = 4*ball.userData.momentum*ball.userData.direction.getComponent(1);
         //window.alert(ball.userData.direction.getComponent(1));
+        //window.alert(ball.userData.momentum);
     }
     else{
         ball.position.y = 1 + raio;
@@ -677,7 +678,9 @@ function updateBallAnimation(ball)
     updateBallPosition(ball);
     ball.rotation.z += (2+ball.userData.momentum) / raio;
     ball.rotation.x += (2+ball.userData.momentum) / raio; /*roda em funcao do raio da bola*/
-    ball.userData.momentum = ball.userData.momentum/1.03;
+    if(ball.userData.falling == false){
+        ball.userData.momentum = ball.userData.momentum/1.03;
+    }
 }
 function updateWhiteBalls()
 {
