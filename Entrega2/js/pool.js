@@ -23,6 +23,7 @@ var pivotPoint1,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6;
 var vectorBalls = [];
 var vectorPivots = [];
 var vectorSticks = [];
+var vectorHoles = [];
 var testVec;
 var testVec2 = new THREE.Vector3(0,1.5,-9);
 var pass = 0;
@@ -82,14 +83,16 @@ function defineStick()
 {
     geometry = new THREE.CylinderGeometry(0.25,0.125,10,64);
 }
-function createHole(xCord,yCord,zCord,rotation){
+function createHole(xCord,yCord,zCord,rotation,r){
     hole = new THREE.Mesh(geometry, materialBlack);
     hole.position.x = xCord;
     hole.position.y = yCord;
     hole.position.z = zCord;
 
     hole.rotation.y += rotation;
+    hole.userData = {raio : r};
 
+    vectorHoles.push(hole);
     group.add(hole);
 }
 
@@ -164,7 +167,7 @@ function createBall(xCord, yCord, zCord){
     ball.position.x = xCord;
     ball.position.y = yCord;
     ball.position.z = zCord;
-    ball.userData = {momentum: 0, collision: -1 ,direction: new THREE.Vector3(0,0,0)};
+    ball.userData = {momentum: 0, collision: -1 ,direction: new THREE.Vector3(0,0,0), falling : false};
 
     vectorBalls.push(ball);
     scene.add(ball);
@@ -179,14 +182,14 @@ function initTable(){
     createLegs(-7,-4.5,14.5);
 
     defineHole1();
-    createHole(-7.5,0.5,-15, 0);
-    createHole(-7.5,0.5, 15, Math.PI /2);
-    createHole(7.5,0.5, 15, Math.PI );
-    createHole(7.5,0.5, -15, - 5 * (Math.PI/2) );
+    createHole(-7.5,0.5,-15, 0,2);
+    createHole(-7.5,0.5, 15, Math.PI /2,2);
+    createHole(7.5,0.5, 15, Math.PI ,2);
+    createHole(7.5,0.5, -15, - 5 * (Math.PI/2) ,2);
 
     defineHole2();
-    createHole(-7.5,0.5,0, 0);
-    createHole(7.5,0.5,0, Math.PI);
+    createHole(-7.5,0.5,0, 0,1.5);
+    createHole(7.5,0.5,0, Math.PI,1.5);
 
     defineRetangleSmall();
     createRetangle(0,1.1,-15,1);
@@ -319,8 +322,8 @@ function onKeyDown(e) { //KeyPressed
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
                     if(ang < Math.PI/3){
-                        vectorPivots[i].rotation.y += (Math.PI/3) * delta;
-                        ang += (Math.PI/3) * delta;
+                        vectorPivots[i].rotation.y += (2*Math.PI/3) * delta;
+                        ang += (2*Math.PI/3) * delta;
                     }
                 }
             }
@@ -331,8 +334,8 @@ function onKeyDown(e) { //KeyPressed
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
                     if(ang >= -Math.PI/3){
-                        vectorPivots[i].rotation.y -= (Math.PI/3) * delta;
-                        ang -= (Math.PI/3) * delta;
+                        vectorPivots[i].rotation.y -= (2*Math.PI/3) * delta;
+                        ang -= (2*Math.PI/3) * delta;
                     }
                 }
             }
@@ -389,7 +392,7 @@ function shootBalls(){/Determina as bolas/
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.momentum = 0.8;
+        vectorBalls[num].userData.momentum = 50 * delta;
     }
     vectorPivots[num].userData.selected = 0;
     /*vectorPivots[num].position.z -= 0.5;*/
@@ -529,12 +532,12 @@ function calculateRealVec(candidates)
     collisionBall.userData.momentum = 0.6;
 }*/
 //COLISION WITH WALL (REFLECTS VECTOR)
-function colidesWithWall(vector, wallNum){
+function reflectsVector(vector, wallNum){
     if(wallNum == 1){ // Z axis Wall
-        vector[0] = -vector[0];
+        vector.setComponent(0, -vector.getComponent(0));
     }
     if(wallNum == 2){ //X axis Wall
-        vector[2] = -vector[2];
+       vector.setComponent(2, -vector.getComponent(2));
     }
     return vector;
 }
@@ -546,25 +549,70 @@ function updateBallStats(ball, point,momentum)
     dir.subVectors(center,point).normalize();
     //window.alert("X" + dir.getComponent(0)+ "Y" + dir.getComponent(1)+ "Z" + dir.getComponent(2));
     ball.userData.direction = dir;
-    ball.userData.momentum = 0.6;
+    ball.userData.momentum = momentum /2;
 }
+
+function colideWall(ball){
+    center = getCenterPoint(ball);
+
+    if(center.getComponent(0) - raio <= -7.5){
+        ball.userData.direction.copy(reflectsVector(ball.userData.direction, 1));
+        //window.alert();
+    }
+    if(center.getComponent(0) + raio >= 7.5){
+        ball.userData.direction.copy(reflectsVector(ball.userData.direction, 1));
+        //window.alert();
+    }
+    if(center.getComponent(2) + raio >= 15){
+        ball.userData.direction.copy(reflectsVector(ball.userData.direction, 2));
+        //window.alert();
+    }
+    if(center.getComponent(2) - raio <= -15){
+        ball.userData.direction.copy(reflectsVector(ball.userData.direction, 2));
+        //window.alert();
+    }
+}
+
+function fallIntoHole(ball){
+    for(i = 0 ; i < 6; i++){
+        if(checkBallCollision(getCenterPoint(vectorHoles[i]), getCenterPoint(ball).addScaledVector(ball.userData.direction, raio)) && ball.userData.falling == false){
+            ball.userData.direction.copy(new THREE.Vector3(0,-1,0));
+            ball.userData.falling = true;
+        }
+
+    }
+}
+
 function colideBall(ball)
 {
-    var i, collisionCenter, center,collisionPoint;
+    var i, collisionCenter, center,collisionPoint,mom;
     center = getCenterPoint(ball);
+
+    fallIntoHole(ball);
+
+    colideWall(ball);
+
+
     for(i = 0; i <= 5; i++)
     {
         collisionCenter = getCenterPoint(vectorBalls[i]);
         if(checkBallCollision(collisionCenter, center))
         {
+
             if(ball.userData.collision == -1){
                 //window.alert("ye");
                 ball.userData.collision = i;
                 vectorBalls[i].userData.collision = i;
                 collisionPoint = checkPointColision(ball,vectorBalls[i]);
                 //window.alert("tenho collisionPoint");
-                updateBallStats(vectorBalls[i], collisionPoint,ball.userData.momentum);//update collision ball
-                updateBallStats(ball, collisionPoint,ball.userData.momentum);
+                if(ball.userData.momentum > vectorBalls[i].userData.momentum){
+                    mom =  ball.userData.momentum;
+                }
+                else{
+                    mom = vectorBalls[i].userData.momentum;
+                }
+                updateBallStats(vectorBalls[i], collisionPoint,mom);//update collision ball
+                updateBallStats(ball, collisionPoint,mom);
                 //window.alert("saiu");
                 return ;
             }
@@ -611,17 +659,25 @@ function changeCuesColor()
     }
 }
 function updateBallPosition(ball)
-{
+{ 
+
+    //MISSING ROTATION
     ball.position.x += 2*ball.userData.momentum*ball.userData.direction.getComponent(0);
-    ball.position.y = 1 + raio;
     ball.position.z += 2*ball.userData.momentum*ball.userData.direction.getComponent(2);
+    if(ball.userData.falling){
+        ball.position.y = 4*ball.userData.momentum*ball.userData.direction.getComponent(1);
+        //window.alert(ball.userData.direction.getComponent(1));
+    }
+    else{
+        ball.position.y = 1 + raio;
+    }
 }
 function updateBallAnimation(ball)
 {
     updateBallPosition(ball);
-    //ball.position.z += 2*ball.userData.momentum;
+    ball.rotation.z += (2+ball.userData.momentum) / raio;
     ball.rotation.x += (2+ball.userData.momentum) / raio; /*roda em funcao do raio da bola*/
-    ball.userData.momentum = ball.userData.momentum/1.05;
+    ball.userData.momentum = ball.userData.momentum/1.03;
 }
 function updateWhiteBalls()
 {
