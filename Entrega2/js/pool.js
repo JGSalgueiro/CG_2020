@@ -444,7 +444,7 @@ function shootBalls(){/Determina as bolas/
 function shootBall(num){/*bolas vao de 0-5 || Tacos n voltam para tras*/
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.momentum = 50 * delta;
+        vectorBalls[num].userData.momentum = 100 * delta;
     }
     vectorPivots[num].userData.selected = 0;
     /*vectorPivots[num].position.z -= 0.5;*/
@@ -481,7 +481,13 @@ function correctBallPosition(ball, collisionBall)
 {
     var collisionCenter;
     var center, vecTrans;
+    var vecTrans;
+    var vecNull = new THREE.Vector3(0,0,0);
     vecTrans = ball.userData.direction;
+    if(vecTrans.equals(vecNull))
+    {
+        vecTrans = collisionBall.userData.direction.negate();/*Dar um vetor de movimento para a bola*/
+    }
     collisionCenter = getCenterPoint(collisionBall);
     //window.alert("x" + vecTrans.getComponent(0) + "z" + vecTrans.getComponent(2));
     center = getCenterPoint(ball);
@@ -511,15 +517,7 @@ function checkPointColision(ball, collisionBall)
     var candidates = [];
     var collisionCenter;
     var center;
-    var vecNull = new THREE.Vector3(0,0,0);
-    var vecTrans;
-
-    //window.alert("entrei");
-    vecTrans = ball.userData.direction;
-    if(vecTrans.equals(vecNull))
-    {
-        ball.userData.direction = collisionBall.userData.direction.negate();/*Dar um vetor de movimento para a bola*/
-    }
+    
     center = correctBallPosition(ball,collisionBall);/*A bola foi a que colidiu*/
     //window.alert("tenho real center");
     collisionCenter = getCenterPoint(collisionBall);
@@ -725,10 +723,10 @@ function updateBallPosition(ball)
 { 
 
     //MISSING ROTATION
-    ball.position.x += 2*ball.userData.momentum*ball.userData.direction.getComponent(0);
-    ball.position.z += 2*ball.userData.momentum*ball.userData.direction.getComponent(2);
+    ball.position.x += ball.userData.momentum*ball.userData.direction.getComponent(0);
+    ball.position.z += ball.userData.momentum*ball.userData.direction.getComponent(2);
     if(ball.userData.falling){
-        ball.position.y += 2*ball.userData.momentum*ball.userData.direction.getComponent(1);
+        ball.position.y += ball.userData.momentum*ball.userData.direction.getComponent(1);
         //window.alert(ball.userData.direction.getComponent(1));
         //window.alert(ball.userData.momentum);
     }
