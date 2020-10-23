@@ -607,20 +607,24 @@ function updateBallStats(ball, point,momentum)
 function colideWall(ball){
     center = getCenterPoint(ball);
 
-    if(center.getComponent(0) - raio <= -7.5){
+    if(center.getComponent(0) - raio <= -7.15){
+        ball.position.x = -7.15 + raio;
         ball.userData.direction.copy(reflectsVector(ball.userData.direction, 1));
         //window.alert();
     }
-    if(center.getComponent(0) + raio >= 7.5){
+    if(center.getComponent(0) + raio >= 7.65){
+        ball.position.x = 7.65 - raio;;
         ball.userData.direction.copy(reflectsVector(ball.userData.direction, 1));
         //window.alert();
     }
-    if(center.getComponent(2) + raio >= 15){
+    if(center.getComponent(2) + raio >= 15.15){
+        ball.position.z = 15.15 - raio;
         ball.userData.direction.copy(reflectsVector(ball.userData.direction, 2));
         //window.alert();
     }
-    if(center.getComponent(2) - raio <= -15){
+    if(center.getComponent(2) - raio <= -14.85){
         ball.userData.direction.copy(reflectsVector(ball.userData.direction, 2));
+        ball.position.z = -14.85 + raio;
         //window.alert();
     }
 }
@@ -641,15 +645,18 @@ function colideBall(ball)
     center = getCenterPoint(ball);
 
     fallIntoHole(ball);
-
+    center = getCenterPoint(ball);
     colideWall(ball);
-
+    center = getCenterPoint(ball);
 
     for(i = 0; i < 21; i++)
     {
         collisionCenter = getCenterPoint(vectorBalls[i]);
         if(checkBallCollision(collisionCenter, center))
         {
+            /*window.alert(center.getComponent(0)+"z"+ center.getComponent(2));
+            window.alert(collisionCenter.getComponent(0)+"z"+ collisionCenter.getComponent(2));
+            window.alert(i + "PUTAS"+collisionCenter.equals(center)+":"+(collisionCenter.distanceTo(center) <= (raio*2)));*/
 
             if(ball.userData.collision == -1){
                 //window.alert("ye");
@@ -683,7 +690,7 @@ function init() {
     initRandom();
     createRandom();
 
-    window.alert(test);
+    //window.alert(test);
 
     createScene();
     createRenderer();
