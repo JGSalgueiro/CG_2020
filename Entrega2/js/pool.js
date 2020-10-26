@@ -460,7 +460,7 @@ function shootBall(num) // Gives a ball to be shot velocity
 {
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.direction.multiplyScalar(50 * delta);
+        vectorBalls[num].userData.direction.multiplyScalar(70 * delta);
     }
 }
 
