@@ -77,6 +77,11 @@ function initRandom() // initializes the random vector bidimensional matrix with
     }
 
 }
+function giveRandomSpeeds(){
+	for(i = 6; i < 6+numberOfRandomBalls; i++){
+		vectorBalls[i].userData.direction.copy(new THREE.Vector3(Math.floor(Math.random() * 3) ,0,Math.floor(Math.random() * 2)));
+	}
+}
 function createRandom() // Randomly assigns a number of balls to their spots (var numberOfRandomBalls)
 { 
     var num = 0, r;
@@ -460,7 +465,7 @@ function shootBall(num) // Gives a ball to be shot velocity
 {
     if(vectorPivots[num].userData.onShootPosition == true){
         vectorPivots[num].userData.onShootPosition = false;
-        vectorBalls[num].userData.direction.multiplyScalar(70 * delta);
+        vectorBalls[num].userData.direction.multiplyScalar(50 * delta);
     }
 }
 
@@ -669,6 +674,8 @@ function init()
     initCues();
     initTable();
     initBalls();
+
+    giveRandomSpeeds();
 
 
     window.addEventListener("keydown", onKeyDown);
