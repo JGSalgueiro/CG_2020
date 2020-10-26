@@ -78,9 +78,9 @@ function initRandom() // initializes the random vector bidimensional matrix with
 
 }
 function giveRandomSpeeds(){
-	for(i = 6; i < 6+numberOfRandomBalls; i++){
-		vectorBalls[i].userData.direction.copy(new THREE.Vector3(Math.floor(Math.random() * 3) ,0,Math.floor(Math.random() * 2)));
-	}
+    for(i = 6; i < 6+numberOfRandomBalls; i++){
+        vectorBalls[i].userData.direction.copy(new THREE.Vector3(Math.floor(Math.random() * 3) ,0,Math.floor(Math.random() * 2)));
+    }
 }
 function createRandom() // Randomly assigns a number of balls to their spots (var numberOfRandomBalls)
 { 
@@ -610,10 +610,31 @@ function colideBall(ball,id) // Checks for all colisions that might happen and c
 
     for(i = id; i < 21; i++)
     {
-        if(i <= 5){
-            if(vectorPivots[i].userData.onShootPosition == false){
+        if(vectorBalls[i].userData.falling == false){
+            if(i <= 5){
+                if(vectorPivots[i].userData.onShootPosition == false){
 
+                    collisionCenter = getCenterPoint(vectorBalls[i]);
+                    if(checkBallCollision(collisionCenter, center))
+                    {
+                            if(ball.userData.direction.length() < vectorBalls[i].userData.direction.length()){
+                                correctBallPosition(vectorBalls[i],ball);/*A vectorBall foi a que colidiu*/
+                                updateBallsStats(vectorBalls[i],ball);
+                            }
+                            else
+                            {
+                                correctBallPosition(ball,vectorBalls[i]);/*A bola foi a que colidiu*/
+                                updateBallsStats(ball,vectorBalls[i]);
+                            }
+                            center = getCenterPoint(ball);
+                            collisionCenter = getCenterPoint(vectorBalls[i]);
+                            return ;
+                    }
+                }
+            }
+            else{
                 collisionCenter = getCenterPoint(vectorBalls[i]);
+
                 if(checkBallCollision(collisionCenter, center))
                 {
                         if(ball.userData.direction.length() < vectorBalls[i].userData.direction.length()){
@@ -629,25 +650,6 @@ function colideBall(ball,id) // Checks for all colisions that might happen and c
                         collisionCenter = getCenterPoint(vectorBalls[i]);
                         return ;
                 }
-            }
-        }
-        else{
-            collisionCenter = getCenterPoint(vectorBalls[i]);
-
-            if(checkBallCollision(collisionCenter, center))
-            {
-                    if(ball.userData.direction.length() < vectorBalls[i].userData.direction.length()){
-                        correctBallPosition(vectorBalls[i],ball);/*A vectorBall foi a que colidiu*/
-                        updateBallsStats(vectorBalls[i],ball);
-                    }
-                    else
-                    {
-                        correctBallPosition(ball,vectorBalls[i]);/*A bola foi a que colidiu*/
-                        updateBallsStats(ball,vectorBalls[i]);
-                    }
-                    center = getCenterPoint(ball);
-                    collisionCenter = getCenterPoint(vectorBalls[i]);
-                    return ;
             }
         }
     }
@@ -741,15 +743,17 @@ function colideBalls()
 {
     var i;
     for(i = 0; i < 21; i++){
-        if(i <=5)
-        {
-            if(vectorPivots[i].userData.onShootPosition == false){
+        if(vectorBalls[i].userData.falling == false){
+            if(i <=5)
+            {
+                if(vectorPivots[i].userData.onShootPosition == false){
+                    colideBall(vectorBalls[i],i+1);
+                }
+            }
+            else
+            {
                 colideBall(vectorBalls[i],i+1);
             }
-        }
-        else
-        {
-            colideBall(vectorBalls[i],i+1);
         }
         
     }
