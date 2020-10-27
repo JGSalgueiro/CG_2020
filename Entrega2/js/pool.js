@@ -385,28 +385,32 @@ function onKeyDown(e)  //KeyPressed
         }
         break;
    case 37: // Left key
-        if(ang >= -60 && ang <= 60){
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
-                    if(ang < Math.PI/3){
-                        vectorPivots[i].rotation.y += (2*Math.PI/3) * delta;
-                        ang += (2*Math.PI/3) * delta;
+                    if(vectorPivots[i].rotation.y >= -Math.PI/3 && vectorPivots[i].rotation.y <= Math.PI/3){
+                        if(vectorPivots[i].rotation.y + (Math.PI/3) * delta >= (Math.PI/3)){
+                            vectorPivots[i].rotation.y = (Math.PI/3);
+                        }
+                        else{
+                            vectorPivots[i].rotation.y += (Math.PI/3) * delta;
+                        }
                     }
                 }
             }
-        }
         break;
     case 39: // Left key
-        if(ang >= -60 && ang <= 60){
             for(i = 0; i < 6; i++){
                 if(vectorPivots[i].userData.selected == 1){
-                    if(ang >= -Math.PI/3){
-                        vectorPivots[i].rotation.y -= (2*Math.PI/3) * delta;
-                        ang -= (2*Math.PI/3) * delta;
+                    if(vectorPivots[i].rotation.y >= -Math.PI/3 && vectorPivots[i].rotation.y <= Math.PI/3){
+                        if(vectorPivots[i].rotation.y - (Math.PI/3) * delta <= -(Math.PI/3)){
+                            vectorPivots[i].rotation.y = -(Math.PI/3);
+                        }
+                        else{
+                            vectorPivots[i].rotation.y -= (Math.PI/3) * delta;
+                        }
                     }
                 }
             }
-        }
         break
     case 69:  //e
         scene.traverse(function (node) {
@@ -414,12 +418,7 @@ function onKeyDown(e)  //KeyPressed
                 node.visible = !node.visible;
             }
         });
-        break;
-
-    case 81://Q
-        pivotPoint1.rotation.y += 0.05;
-        break;
-    
+        break;    
     }
 }
 function createScene()
@@ -590,7 +589,7 @@ function colideWall(ball) // Updates the balls vectors of movement after colisio
 function fallIntoHole(ball) // Updates the vectors of movement of a ball when it falls into a hole (falls into infinity)
 {
     for(i = 0 ; i < 6; i++){
-        if(checkBallCollision(getCenterPoint(vectorHoles[i]), getCenterPoint(ball).addScaledVector(ball.userData.direction, raio*3)) && ball.userData.falling == false){
+        if(checkBallCollision(getCenterPoint(vectorHoles[i]), getCenterPoint(ball).addScaledVector(ball.userData.direction, raio*2.5)) && ball.userData.falling == false){
             ball.userData.direction.copy(new THREE.Vector3(0,-1*delta,0));
             ball.userData.falling = true;
         }
@@ -603,10 +602,10 @@ function colideBall(ball,id) // Checks for all colisions that might happen and c
     center = getCenterPoint(ball);
 
 
-    fallIntoHole(ball);
+    /*fallIntoHole(ball);
     center = getCenterPoint(ball);
     colideWall(ball);
-    center = getCenterPoint(ball);
+    center = getCenterPoint(ball);*/
 
     for(i = id; i < 21; i++)
     {
@@ -626,8 +625,6 @@ function colideBall(ball,id) // Checks for all colisions that might happen and c
                                 correctBallPosition(ball,vectorBalls[i]);/*A bola foi a que colidiu*/
                                 updateBallsStats(ball,vectorBalls[i]);
                             }
-                            center = getCenterPoint(ball);
-                            collisionCenter = getCenterPoint(vectorBalls[i]);
                             return ;
                     }
                 }
@@ -743,6 +740,8 @@ function colideBalls()
 {
     var i;
     for(i = 0; i < 21; i++){
+        fallIntoHole(vectorBalls[i]);
+        colideWall(vectorBalls[i]);
         if(vectorBalls[i].userData.falling == false){
             if(i <=5)
             {
