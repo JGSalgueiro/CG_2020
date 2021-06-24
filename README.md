@@ -1,2 +1,3 @@
-# CG_2020
+# Graphics Computation Repository
 Computação Gráfica 2020 - Instituto Superior Tecnico ULisboa 
+
